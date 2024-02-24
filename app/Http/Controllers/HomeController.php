@@ -16,10 +16,21 @@ class HomeController extends Controller
      */
     public function show(): View
     {
+        // Inputs
         $d = request()->input('d', 100);
         $ac = request()->input('ac');
         $g = request()->input('g');
+        $fix = request()->input('fix');
 
+        // Fix
+        if ($fix == 'on') {
+            session()->put('fix', true);
+        } elseif ($fix == 'off') {
+            session()->put('fix', false);
+        }
+        $isFix = session()->get('fix');
+
+        // Logic
         $discipline = Discipline::find($d);
 
         $resultsOrdered = Result::with(['athlete', 'athleteCategory', 'event'])
@@ -43,6 +54,8 @@ class HomeController extends Controller
             'd' => $d,
             'ac' => $ac,
             'g' => $g,
+            'fix' => $fix,
+            'isFix' => $isFix,
         ]);
     }
 }

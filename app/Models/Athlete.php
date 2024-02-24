@@ -18,6 +18,15 @@ class Athlete extends Model
     protected $guarded = [];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'birthdate' => 'date',
+    ];
+
+    /**
      * Get the results for the athlete.
      */
     public function results(): HasMany
