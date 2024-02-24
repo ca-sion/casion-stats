@@ -21,7 +21,7 @@
             </div>
 
             <div class="max-w-7xl mx-auto p-6 lg:p-8">
-                <div class="flex justify-center gap-6">
+                <div class="flex flex-col sm:flex-row justify-center gap-6">
 
                     <form action="" method="get" class="flex flex-col gap-2">
                         <select class="select select-bordered w-full max-w-xs" onchange="this.form.submit()" name="d">
