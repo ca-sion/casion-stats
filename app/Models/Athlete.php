@@ -27,6 +27,15 @@ class Athlete extends Model
     ];
 
     /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'birthdate',
+    ];
+
+    /**
      * Get the results for the athlete.
      */
     public function results(): HasMany

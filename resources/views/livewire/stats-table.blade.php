@@ -85,10 +85,12 @@
         </div>
 
         <div class="flex flex-col gap-2 mt-6">
+            @if(app()->isLocal())
             <div class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" class="toggle toggle-warning toggle-xs" id="fix" wire:model.live="fix" />
                 <label for="fix" class="label-text text-xs cursor-pointer">Mode Diagnostic (Fix)</label>
             </div>
+            @endif
             @if ($isFix)
             <div class="flex items-center gap-2 cursor-pointer animate-in fade-in duration-300">
                 <input type="checkbox" class="toggle toggle-info toggle-xs" id="showOnlyErrors" wire:model.live="showOnlyErrors" />

@@ -28,8 +28,13 @@ class StatsTable extends Component
 
     public function mount()
     {
-        $this->fix = session()->get('fix', false);
-        $this->showOnlyErrors = session()->get('showOnlyErrors', false);
+        if (app()->isLocal()) {
+            $this->fix = session()->get('fix', false);
+            $this->showOnlyErrors = session()->get('showOnlyErrors', false);
+        } else {
+            $this->fix = false;
+            $this->showOnlyErrors = false;
+        }
     }
 
     public function updatedFix($value)
@@ -181,7 +186,7 @@ class StatsTable extends Component
 
         return view('livewire.stats-table', [
             'results' => $results,
-            'isFix' => $this->fix,
+            'isFix' => $this->fix && app()->isLocal(),
             'canFix' => app()->isLocal(),
             'errorCount' => $errorCount,
             'disciplines' => \App\Models\Discipline::orderBy('name')->get()->values(),
