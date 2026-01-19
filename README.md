@@ -5,21 +5,23 @@ Ce projet est une application web de gestion et de consultation des statistiques
 ## 🚀 Fonctionnalités
 
 - **Consultation des performances** : Visualisation des résultats par discipline.
-- **Filtrage multicritères** :
-    - Par **discipline** (ex: 100m, Longueur, Poids).
+- **Filtrage multicritères avancé** :
+    - Par **discipline** avec recherche instantanée (dropdown searchable).
     - Par **catégorie d'athlète** (U18, Elite, etc.).
     - Par **genre** (Homme/Femme).
-- **Classement automatique** : Les résultats sont triés selon la logique propre à chaque discipline (temps le plus bas pour les courses, distance la plus élevée pour les lancers/sauts).
-- **Meilleure performance unique** : Pour une sélection donnée, le système ne conserve que le meilleur résultat par athlète.
-- **Mode Diagnostic ("Fix")** : Un mode administrateur permettant de :
-    - Visualiser les IDs internes des données.
-    - Détecter les incohérences de genre (ex: un homme dans une catégorie femme).
-    - Identifier les erreurs de catégorie basées sur l'âge (athlète trop vieux pour sa catégorie lors de l'événement).
+    - **Filtrage Inclusif** : Option permettant d'inclure toutes les catégories plus jeunes lors de la sélection d'une catégorie parent (ex: U16 affiche U16, U14, U12).
+- **Classement automatique** : Les résultats sont triés selon la logique de performance propre à chaque discipline.
+- **Meilleure performance unique** : Par défaut, le système ne conserve que le meilleur résultat par athlète pour garantir un classement propre.
+- **Hub de Diagnostic & Correction ("Fix")** : Un outil complet pour la maintenance des données (accessible en `APP_ENV=local`) :
+    - **Détection automatique d'anomalies** (Genre, Âge athlétique, Doublons, Formats suspect, Catégories sous-optimales).
+    - **Actions en Un Clic** : Synchronisation du genre, changement de catégorie, suppression de doublons.
+    - **Correction en Masse (Bulk Fix)** : Application groupée de toutes les corrections automatiques avec résumé de confirmation.
+    - **Assistance SQL** : Requêtes `UPDATE/DELETE` prêtes à l'emploi.
 
 ## 🛠 Stack Technique
 
 - **Framework** : Laravel 10+
-- **Frontend** : Blade, Tailwind CSS, DaisyUI
+- **Frontend** : Livewire 3+ (pour la réactivité sans rechargement), Blade, Tailwind CSS, DaisyUI
 - **Build Tool** : Vite
 - **Base de données** : MySQL / PostgreSQL (via Eloquent ORM)
 
@@ -52,10 +54,10 @@ Le schéma de données est structuré pour refléter la complexité des compéti
 ### Traitement des Résultats
 Le coeur de l'application réside dans la récupération et le tri des données via le `HomeController` :
 
-1. **Extraction** : Récupération des résultats liés à une discipline spécifique.
-2. **Filtrage** : Application dynamique des filtres de catégorie et de genre.
-3. **Tri Intelligent** : Utilisation de la colonne `sorting` de la table `disciplines` pour effectuer un `orderByRaw` sur la performance castée en `UNSIGNED` (pour gérer les temps et distances stockés en chaînes de caractères).
-4. **Déduplication** : Application de `unique('athlete_id')` pour ne montrer que la performance de pointe (top rank) de chaque athlète dans les résultats affichés.
+1. **Extraction** : Récupération des résultats via le composant Livewire `StatsTable`.
+2. **Filtrage & Inclusion** : Application des filtres de catégorie (stricts ou inclusifs) et de genre.
+3. **Tri de Performance** : Basé sur `performance_normalized` pour assurer un tri mathématique fiable quel que soit le format d'affichage.
+4. **Déduplication** : Application de `unique('athlete_id')` pour ne montrer que la performance de pointe (sauf en mode diagnostic où toutes les erreurs peuvent être visibles).
 
 ### Validation des Données
 Le mode **Fix** ajoute une couche de contrôle qualité directement dans la vue, permettant d'identifier visuellement les données qui nécessitent une correction manuelle dans la base de données.
