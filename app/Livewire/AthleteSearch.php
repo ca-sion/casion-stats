@@ -15,10 +15,19 @@ class AthleteSearch extends Component
         $this->results = [];
 
         if (strlen($this->query) >= 2) {
-            $this->results = Athlete::where('first_name', 'like', '%' . $this->query . '%')
-                ->orWhere('last_name', 'like', '%' . $this->query . '%')
-                ->take(7)
-                ->get();
+            $terms = explode(' ', $this->query);
+            
+            $queryBuilder = Athlete::query();
+
+            foreach ($terms as $term) {
+                if (empty($term)) continue;
+                $queryBuilder->where(function($q) use ($term) {
+                    $q->where('first_name', 'like', '%' . $term . '%')
+                      ->orWhere('last_name', 'like', '%' . $term . '%');
+                });
+            }
+
+            $this->results = $queryBuilder->take(7)->get();
         }
     }
 
