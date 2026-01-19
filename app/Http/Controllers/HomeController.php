@@ -32,16 +32,11 @@ class HomeController extends Controller
         // Logic
         $discipline = Discipline::find($d);
 
-        $resultsOrdered = Result::with(['athlete', 'athleteCategory', 'event'])
-            ->where('discipline_id', $discipline->id)
-            ->when($ac, function (Builder $query, int $ac) {
-                $query->where('athlete_category_id', '=', $ac);
-            })
-            ->when($g, function (Builder $query, string $g) {
-                $query->whereRelation('athleteCategory', 'genre', '=', $g);
-            })
-            ->orderByRaw('CAST(performance as UNSIGNED) '.$discipline->sorting)
-            ->orderBy('performance', $discipline->sorting)
+        $resultsOrdered = Result::withRelations()
+            ->forDiscipline($discipline->id)
+            ->forCategory($ac)
+            ->forGenre($g)
+            ->orderedByPerformance($discipline->sorting)
             ->get();
 
         $results = $resultsOrdered->unique('athlete_id');
