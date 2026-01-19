@@ -128,7 +128,11 @@
                         </a>
                         @if ($isFix)
                         <span class="text-[10px] opacity-70">
-                            {{ $result->athlete->birthdate->format('Y') }} ({{ $result->event->date->year - $result->athlete->birthdate->year }} ans)
+                            @if($result->athlete->birthdate->year > 1900)
+                                {{ $result->athlete->birthdate->format('Y') }} ({{ $result->event->date->year - $result->athlete->birthdate->year }} ans)
+                            @else
+                                <span class="text-orange-600 font-semibold italic">Année inconnue</span>
+                            @endif
                         </span>
                         @endif
                     </div>

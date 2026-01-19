@@ -138,4 +138,14 @@ class DiagnosticTest extends TestCase
 
         $this->assertEmpty($diagnostics);
     }
+    public function test_it_detects_missing_birthdate(): void
+    {
+        $athlete = Athlete::factory()->create(['birthdate' => '-0001-11-30']);
+        $result = Result::factory()->create(['athlete_id' => $athlete->id]);
+
+        $diagnostics = collect($result->getDiagnostics());
+
+        $this->assertCount(1, $diagnostics->where('type', 'missing_birthdate'));
+        $this->assertCount(0, $diagnostics->where('type', 'age_mismatch'));
+    }
 }

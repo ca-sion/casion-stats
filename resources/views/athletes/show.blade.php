@@ -12,7 +12,12 @@
                 <div>
                     <h1 class="text-2xl font-bold">{{ $athlete->first_name }} {{ $athlete->last_name }}</h1>
                     <p class="text-xs text-gray-500 uppercase tracking-wider">
-                        {{ $athlete->genre == 'm' ? 'Homme' : 'Femme' }} • Né(e) en {{ $athlete->birthdate->format('Y') }}
+                        {{ $athlete->genre == 'm' ? 'Homme' : 'Femme' }} • 
+                        @if($athlete->birthdate->year > 1900)
+                            Né(e) en {{ $athlete->birthdate->format('Y') }}
+                        @else
+                            Date de naissance inconnue
+                        @endif
                     </p>
                 </div>
                 <a href="{{ url()->previous() == url()->current() ? url('/') : url()->previous() }}" class="btn btn-sm btn-outline">

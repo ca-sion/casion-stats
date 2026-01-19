@@ -123,8 +123,15 @@ class Result extends Model
 
         // 2. Age category mismatch (Athletic Age: Year-based)
         $athleticAge = $this->event->date->year - $this->athlete->birthdate->year;
-        
-        if ($this->athleteCategory->age_limit) {
+        $hasValidBirthdate = $this->athlete->birthdate->year > 1900;
+
+        if (!$hasValidBirthdate) {
+            $issues[] = [
+                'type' => 'missing_birthdate',
+                'label' => "Date de naissance manquante",
+                'severity' => 'warning',
+            ];
+        } elseif ($this->athleteCategory->age_limit) {
             // Check if it's an "exact age" category (e.g. U10 W08, U16 M15)
             // Pattern: name ends with [MW]\d{2}
             $isExactAge = preg_match('/[MW]\d{2}$/', $this->athleteCategory->name);
