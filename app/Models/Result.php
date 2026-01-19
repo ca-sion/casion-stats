@@ -103,4 +103,81 @@ class Result extends Model
     {
         return $this->belongsTo(Discipline::class);
     }
+
+    /**
+     * Get diagnostics for this result.
+     * Returns an array of issues found.
+     */
+    public function getDiagnostics(): array
+    {
+        $issues = [];
+
+        // 1. Genre mismatch
+        if ($this->athlete->genre !== $this->athleteCategory->genre) {
+            $issues[] = [
+                'type' => 'genre_mismatch',
+                'label' => "Genre {$this->athlete->genre} ≠ Cat {$this->athleteCategory->genre}",
+                'severity' => 'warning',
+            ];
+        }
+
+        // 2. Age category mismatch (Athletic Age: Year-based)
+        $athleticAge = $this->event->date->year - $this->athlete->birthdate->year;
+        
+        if ($this->athleteCategory->age_limit) {
+            // Check if it's an "exact age" category (e.g. U10 W08, U16 M15)
+            // Pattern: name ends with [MW]\d{2}
+            $isExactAge = preg_match('/[MW]\d{2}$/', $this->athleteCategory->name);
+
+            if ($isExactAge) {
+                if ($athleticAge != $this->athleteCategory->age_limit) {
+                    $issues[] = [
+                        'type' => 'age_mismatch',
+                        'label' => "Âge ({$athleticAge} ans) ≠ {$this->athleteCategory->age_limit} attendu",
+                        'severity' => 'warning',
+                    ];
+                }
+            } else {
+                // Regular "Under" category
+                if ($athleticAge > $this->athleteCategory->age_limit) {
+                    $issues[] = [
+                        'type' => 'age_mismatch',
+                        'label' => "Âge ({$athleticAge} ans) > Limite {$this->athleteCategory->age_limit}",
+                        'severity' => 'warning',
+                    ];
+                }
+            }
+        }
+
+        // 3. Potential duplicate
+        // Search for another result with same athlete, discipline and date
+        $duplicate = self::where('athlete_id', $this->athlete_id)
+            ->where('discipline_id', $this->discipline_id)
+            ->where('id', '!=', $this->id)
+            ->whereHas('event', function ($query) {
+                $query->where('date', $this->event->date);
+            })
+            ->exists();
+
+        if ($duplicate) {
+            $issues[] = [
+                'type' => 'duplicate',
+                'label' => "Doublon potentiel (même jour)",
+                'severity' => 'info',
+            ];
+        }
+
+        // 4. Performance format check (simple heuristic)
+        // If discipline has 'sorting' = asc (usually time), check if it contains ':' or '.' and looks like a number
+        // This is a basic check and could be refined per discipline if needed.
+        if (!preg_match('/^\d+([.:]\d+)*$/', $this->performance)) {
+             $issues[] = [
+                'type' => 'format_issue',
+                'label' => "Format performance suspect: '{$this->performance}'",
+                'severity' => 'info',
+            ];
+        }
+
+        return $issues;
+    }
 }

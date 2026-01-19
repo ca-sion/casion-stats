@@ -20,15 +20,22 @@ class StatsTable extends Component
     public $genre = null;
 
     public $fix = false;
+    public $showOnlyErrors = false;
 
     public function mount()
     {
         $this->fix = session()->get('fix', false);
+        $this->showOnlyErrors = session()->get('showOnlyErrors', false);
     }
 
     public function updatedFix($value)
     {
         session()->put('fix', (bool)$value);
+    }
+
+    public function updatedShowOnlyErrors($value)
+    {
+        session()->put('showOnlyErrors', (bool)$value);
     }
 
     public function render()
@@ -45,9 +52,26 @@ class StatsTable extends Component
 
         $results = $resultsOrdered->unique('athlete_id');
 
+        $errorCount = 0;
+        if ($isFix) {
+            $resultsWithDiagnostics = $results->map(function ($result) {
+                $result->diagnostics = $result->getDiagnostics();
+                return $result;
+            });
+
+            $errorCount = $resultsWithDiagnostics->filter(fn($r) => !empty($r->diagnostics))->count();
+
+            if ($this->showOnlyErrors) {
+                $results = $resultsWithDiagnostics->filter(fn($r) => !empty($r->diagnostics));
+            } else {
+                $results = $resultsWithDiagnostics;
+            }
+        }
+
         return view('livewire.stats-table', [
             'results' => $results,
             'isFix' => $isFix,
+            'errorCount' => $errorCount,
             'disciplines' => Discipline::all(),
             'athleteCategories' => AthleteCategory::orderBy('order')->get(),
         ]);
