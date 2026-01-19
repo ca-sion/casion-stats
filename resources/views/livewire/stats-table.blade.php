@@ -55,7 +55,7 @@
             <tr wire:key="{{ $result->id }}">
                 <th>{{ $loop->iteration }}</th>
                 <td>
-                    <a href="{{ route('athletes.show', $result->athlete->id) }}" class="link link-hover text-blue-600 font-semibold">
+                    <a href="{{ route('athletes.show', $result->athlete->id) }}" class="link link-hover text-slate-700 font-semibold">
                         {{ $result->athlete->first_name }} {{ $result->athlete->last_name }}
                     </a>
                 </td>
