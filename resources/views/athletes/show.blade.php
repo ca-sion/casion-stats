@@ -29,7 +29,7 @@
                             @foreach ($personalBests as $pb)
                             <tr>
                                 <td class="font-medium px-0">{{ $pb->discipline->name }}</td>
-                                <td class="text-right font-bold text-red-600 px-0">{{ $pb->performance }}</td>
+                                <td class="text-right font-bold text-slate-700 px-0">{{ $pb->performance }}</td>
                                 <td class="text-right text-[10px] opacity-40 px-0">{{ $pb->event->date->format('Y') }}</td>
                             </tr>
                             @endforeach
@@ -55,7 +55,7 @@
                             <tr>
                                 <td class="text-[10px] px-1">{{ $result->event->date->format('d.m.y') }}</td>
                                 <td class="font-medium px-1">{{ $result->discipline->name }}</td>
-                                <td class="font-bold text-red-600 px-1">{{ $result->performance }}</td>
+                                <td class="font-bold text-slate-700 px-1">{{ $result->performance }}</td>
                                 <td class="text-[10px] opacity-70 px-1 truncate max-w-[150px]">{{ $result->event->location }}</td>
                                 <td class="text-right px-1">{{ $result->rank }}</td>
                             </tr>
