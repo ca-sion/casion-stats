@@ -27,6 +27,37 @@ class DataDiagnosticService
             $result->load('event');
         }
 
+        // 0. Check for missing relations
+        if (!$result->athlete) {
+            $issues[] = [
+                'type' => 'missing_relation',
+                'label' => "Athlète manquant (ID: {$result->athlete_id})",
+                'severity' => 'error',
+                'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
+            ];
+            return $issues;
+        }
+
+        if (!$result->athleteCategory) {
+            $issues[] = [
+                'type' => 'missing_relation',
+                'label' => "Catégorie manquante (ID: {$result->athlete_category_id})",
+                'severity' => 'error',
+                'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
+            ];
+            return $issues;
+        }
+
+        if (!$result->event) {
+            $issues[] = [
+                'type' => 'missing_relation',
+                'label' => "Événement manquant (ID: {$result->event_id})",
+                'severity' => 'error',
+                'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
+            ];
+            return $issues;
+        }
+
         // 1. Genre mismatch
         if ($result->athlete->genre !== $result->athleteCategory->genre) {
             $issues[] = [

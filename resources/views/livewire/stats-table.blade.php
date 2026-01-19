@@ -197,12 +197,12 @@
                 <th>{{ $loop->iteration }}</th>
                 <td>
                     <div class="flex flex-col">
-                        <a href="{{ route('athletes.show', $result->athlete->id) }}" class="link link-hover text-slate-700 font-semibold whitespace-nowrap">
-                            {{ $result->athlete->first_name }} {{ $result->athlete->last_name }}
+                        <a href="{{ $result->athlete ? route('athletes.show', $result->athlete->id) : '#' }}" class="link link-hover text-slate-700 font-semibold whitespace-nowrap {{ !$result->athlete ? 'text-error cursor-not-allowed' : '' }}">
+                            {{ $result->athlete ? $result->athlete->first_name . ' ' . $result->athlete->last_name : 'Athlète Manquant (' . $result->athlete_id . ')' }}
                         </a>
                         @if ($isFix)
                         <span class="text-[10px] opacity-70">
-                            ID: {{ $result->athlete->id }}
+                            ID: {{ $result->athlete_id }}
                         </span>
                         @endif
                     </div>
@@ -213,15 +213,15 @@
                 <td class="text-center tabular-nums opacity-60">
                     {{ $result->athlete_age ? $result->athlete_age . ' ans' : '—' }}
                 </td>
-                <td class="tabular-nums">{{ $result->event->date->format('Y') }}</td>
-                <td class="max-w-xs truncate">{{ $result->event->name }}</td>
-                <td>{{ $result->event->location }}</td>
+                <td class="tabular-nums">{{ $result->event?->date?->format('Y') ?? '?' }}</td>
+                <td class="max-w-xs truncate">{{ $result->event?->name ?? 'Événement Manquant (' . $result->event_id . ')' }}</td>
+                <td>{{ $result->event?->location }}</td>
                 <td>{{ $result->rank }}</td>
                 @if ($isFix)
-                <td class="whitespace-nowrap">{{ $result->event->date->format('d.m.Y') }}</td>
+                <td class="whitespace-nowrap">{{ $result->event?->date?->format('d.m.Y') ?? '?' }}</td>
                 <td class="font-mono text-[10px] opacity-70">{{ $result->id }}</td>
-                <td class="font-mono text-[10px] opacity-70">{{ $result->athlete->id }}</td>
-                <td>{{ $result->athlete->genre }}</td>
+                <td class="font-mono text-[10px] opacity-70">{{ $result->athlete_id }}</td>
+                <td>{{ $result->athlete?->genre ?? '?' }}</td>
                 <td>
                     <div class="flex flex-col gap-1">
                         @foreach ($result->diagnostics as $diagnostic)

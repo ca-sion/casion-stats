@@ -110,7 +110,7 @@ class StatsTable extends Component
 
                 if ($diagnostic['type'] === 'genre_mismatch') {
                     $result->athlete->update(['genre' => $result->athleteCategory->genre]);
-                } elseif ($diagnostic['type'] === 'duplicate') {
+                } elseif ($diagnostic['type'] === 'duplicate' || $diagnostic['type'] === 'missing_relation') {
                     $result->delete();
                 } elseif ($diagnostic['type'] === 'age_mismatch' && isset($diagnostic['suggested_category_id'])) {
                     $result->update(['athlete_category_id' => $diagnostic['suggested_category_id']]);
@@ -157,6 +157,7 @@ class StatsTable extends Component
             'genre_mismatch' => 0,
             'duplicate' => 0,
             'age_mismatch' => 0,
+            'missing_relation' => 0,
         ];
 
         // Process diagnostics for results
