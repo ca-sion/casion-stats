@@ -11,7 +11,7 @@ use Livewire\Attributes\Url;
 class StatsTable extends Component
 {
     #[Url(as: 'd')]
-    public $disciplineId = 100;
+    public $disciplineId = null;
 
     #[Url(as: 'ac')]
     public $categoryId = null;
@@ -123,11 +123,17 @@ class StatsTable extends Component
 
     private function getResults()
     {
-        $discipline = \App\Models\Discipline::find($this->disciplineId);
-        $query = \App\Models\Result::query()
+        $discipline = Discipline::find($this->disciplineId) ?? Discipline::orderBy('order')->first();
+        if ($discipline && $this->disciplineId === null) {
+            $this->disciplineId = $discipline->id;
+        }
+
+        $category = $this->categoryId ? AthleteCategory::find($this->categoryId) : null;
+
+        $query = Result::query()
             ->withRelations()
             ->forDiscipline($this->disciplineId)
-            ->forCategory($this->categoryId, $this->inclusiveCategory)
+            ->forCategory($category ?: $this->categoryId, $this->inclusiveCategory)
             ->forGenre($this->genre)
             ->orderedByPerformance($discipline->sorting ?? 'asc');
 
@@ -143,7 +149,7 @@ class StatsTable extends Component
 
     public function render()
     {
-        $discipline = \App\Models\Discipline::find($this->disciplineId);
+        $discipline = Discipline::find($this->disciplineId);
         $results = $this->getResults();
 
         $errorCount = 0;
@@ -189,8 +195,8 @@ class StatsTable extends Component
             'isFix' => $this->fix && app()->isLocal(),
             'canFix' => app()->isLocal(),
             'errorCount' => $errorCount,
-            'disciplines' => \App\Models\Discipline::orderBy('name')->get()->values(),
-            'athleteCategories' => \App\Models\AthleteCategory::orderBy('order')->get(),
+            'disciplines' => Discipline::orderBy('order')->get()->values(),
+            'athleteCategories' => AthleteCategory::orderBy('order')->get(),
             'fixSummary' => $fixSummary,
         ]);
     }
