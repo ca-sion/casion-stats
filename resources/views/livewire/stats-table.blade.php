@@ -68,17 +68,37 @@
     <div class="overflow-x-auto relative min-w-[600px]">
         @if ($isFix && $errorCount > 0)
         <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4 rounded shadow-sm animate-in slide-in-from-top duration-500">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-orange-700">
+                            {{ $errorCount }} anomalie{{ $errorCount > 1 ? 's' : '' }} détectée{{ $errorCount > 1 ? 's' : '' }}.
+                        </p>
+                    </div>
                 </div>
-                <div class="ml-3">
-                    <p class="text-sm text-orange-700">
-                        {{ $errorCount }} anomalie{{ $errorCount > 1 ? 's' : '' }} détectée{{ $errorCount > 1 ? 's' : '' }} dans les résultats affichés.
-                    </p>
+
+                @if($canFix && array_sum($fixSummary) > 0)
+                <div class="flex flex-col sm:flex-row items-center gap-3 bg-white/50 p-2 rounded border border-orange-200">
+                    <div class="text-[10px] text-orange-800 leading-tight">
+                        <strong>Auto-fixes dispos :</strong>
+                        <ul class="flex flex-wrap gap-x-2">
+                            @if($fixSummary['genre_mismatch'] > 0) <li>• {{ $fixSummary['genre_mismatch'] }} genres</li> @endif
+                            @if($fixSummary['duplicate'] > 0) <li>• {{ $fixSummary['duplicate'] }} doublons</li> @endif
+                            @if($fixSummary['age_mismatch'] > 0) <li>• {{ $fixSummary['age_mismatch'] }} catégories</li> @endif
+                        </ul>
+                    </div>
+                    <button wire:click="bulkFix" 
+                            wire:confirm="Voulez-vous appliquer ces {{ array_sum($fixSummary) }} corrections automatiques sur les résultats affichés ?"
+                            class="btn btn-xs btn-warning">
+                        Tout corriger ({{ array_sum($fixSummary) }})
+                    </button>
                 </div>
+                @endif
             </div>
         </div>
         @elseif($isFix && $errorCount === 0)
@@ -95,6 +115,13 @@
                     </p>
                 </div>
             </div>
+        </div>
+        @endif
+
+        @if (session()->has('bulk_success'))
+        <div class="alert alert-success py-2 mb-4 text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ session('bulk_success') }}</span>
         </div>
         @endif
 

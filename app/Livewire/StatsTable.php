@@ -83,43 +83,107 @@ class StatsTable extends Component
         $result->update(['performance' => $performance]);
     }
 
-    public function render()
+    public function bulkFix($fixTypes = [])
     {
-        $discipline = Discipline::find($this->disciplineId);
-        $isFix = $this->fix;
+        $this->ensureCanFix();
 
-        $resultsOrdered = Result::withRelations()
+        // We fetch the current results based on existing filters
+        $results = $this->getResults();
+
+        foreach ($results as $result) {
+            // Ensure diagnostics are loaded for the result
+            $result->diagnostics = $result->getDiagnostics();
+
+            foreach ($result->diagnostics as $diagnostic) {
+                // Only process types that were selected (or all if none specified)
+                if (!empty($fixTypes) && !in_array($diagnostic['type'], $fixTypes)) {
+                    continue;
+                }
+
+                if ($diagnostic['type'] === 'genre_mismatch') {
+                    $result->athlete->update(['genre' => $result->athleteCategory->genre]);
+                } elseif ($diagnostic['type'] === 'duplicate') {
+                    $result->delete();
+                } elseif ($diagnostic['type'] === 'age_mismatch' && isset($diagnostic['suggested_category_id'])) {
+                    $result->update(['athlete_category_id' => $diagnostic['suggested_category_id']]);
+                }
+            }
+        }
+
+        session()->flash('bulk_success', 'Corrections appliquées avec succès.');
+    }
+
+    private function getResults()
+    {
+        $discipline = \App\Models\Discipline::find($this->disciplineId);
+        $query = \App\Models\Result::query()
+            ->withRelations()
             ->forDiscipline($this->disciplineId)
             ->forCategory($this->categoryId)
             ->forGenre($this->genre)
-            ->orderedByPerformance($discipline->sorting ?? 'asc')
-            ->get();
+            ->orderedByPerformance($discipline->sorting ?? 'asc');
 
-        $results = $resultsOrdered->unique('athlete_id');
+        $results = $query->get();
+
+        // If not in fix mode, we only want the best result per athlete
+        if (!$this->fix) {
+            $results = $results->unique('athlete_id');
+        }
+
+        return $results;
+    }
+
+    public function render()
+    {
+        $discipline = \App\Models\Discipline::find($this->disciplineId);
+        $results = $this->getResults();
 
         $errorCount = 0;
-        if ($isFix) {
-            $resultsWithDiagnostics = $results->map(function ($result) {
-                $result->diagnostics = $result->getDiagnostics();
-                return $result;
-            });
+        $fixSummary = [
+            'genre_mismatch' => 0,
+            'duplicate' => 0,
+            'age_mismatch' => 0,
+        ];
 
-            $errorCount = $resultsWithDiagnostics->filter(fn($r) => !empty($r->diagnostics))->count();
-
-            if ($this->showOnlyErrors) {
-                $results = $resultsWithDiagnostics->filter(fn($r) => !empty($r->diagnostics));
-            } else {
-                $results = $resultsWithDiagnostics;
+        // Process diagnostics for results
+        foreach ($results as $result) {
+            $diagnostics = $result->getDiagnostics();
+            $result->diagnostics = $diagnostics;
+            
+            if (!empty($diagnostics)) {
+                $errorCount++;
+                foreach ($diagnostics as $d) {
+                    if (isset($fixSummary[$d['type']])) {
+                        // Only count if it's actually auto-fixable
+                        if ($d['type'] === 'age_mismatch' && !isset($d['suggested_category_id'])) {
+                            continue;
+                        }
+                        $fixSummary[$d['type']]++;
+                    }
+                }
             }
+        }
+
+        // After calculating diagnostics, if showOnlyErrors is true, we filter them
+        if ($this->fix && $this->showOnlyErrors) {
+            $results = $results->filter(fn($r) => !empty($r->diagnostics));
+        }
+        
+        // Re-apply unique AFTER diagnostics if in fix mode but user still wants unique athletes?
+        // Usually, in fix mode, we might want to see all errors.
+        // But the user complained about duplicates of athletes, so let's keep it clean.
+        if ($this->fix && !$this->showOnlyErrors) {
+             $results = $results->unique('athlete_id');
         }
 
         return view('livewire.stats-table', [
             'results' => $results,
-            'isFix' => $isFix,
+            'isFix' => $this->fix,
             'canFix' => app()->isLocal(),
             'errorCount' => $errorCount,
-            'disciplines' => Discipline::all(),
-            'athleteCategories' => AthleteCategory::orderBy('order')->get(),
+            'disciplines' => \App\Models\Discipline::orderBy('name')->get(),
+            'athleteCategories' => \App\Models\AthleteCategory::orderBy('order')->get(),
+            'fixSummary' => $fixSummary,
         ]);
     }
 }

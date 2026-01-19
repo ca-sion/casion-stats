@@ -168,7 +168,55 @@ class DiagnosticTest extends TestCase
         $issue = $diagnostics->firstWhere('type', 'age_mismatch');
 
         $this->assertNotNull($issue);
-        $this->assertStringContainsString('Cat Senior (MAN) alors que U18 M possible', $issue['label']);
+        $this->assertStringContainsString('Cat MAN alors que U18 M possible', $issue['label']);
         $this->assertEquals($youthCat->id, $issue['suggested_category_id']);
+    }
+
+    public function test_it_prioritizes_general_categories(): void
+    {
+        // Create both a specific and a general category
+        $generalCat = AthleteCategory::factory()->create(['name' => 'U12 W', 'age_limit' => 11, 'genre' => 'w']);
+        $specificCat = AthleteCategory::factory()->create(['name' => 'U12 W11', 'age_limit' => 11, 'genre' => 'w']);
+        
+        // Athlete aged 11
+        $athlete = Athlete::factory()->create(['birthdate' => '2013-06-01', 'genre' => 'w']);
+        $event = Event::factory()->create(['date' => '2024-06-01']);
+        
+        // Result currently in a wrong category (e.g., U14 W)
+        $wrongCat = AthleteCategory::factory()->create(['name' => 'U14 W', 'age_limit' => 13, 'genre' => 'w']);
+        $result = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'athlete_category_id' => $wrongCat->id,
+            'event_id' => $event->id,
+        ]);
+
+        $diagnostics = collect($result->getDiagnostics());
+        $issue = $diagnostics->firstWhere('type', 'age_mismatch');
+
+        $this->assertNotNull($issue);
+        // Should suggest the general category because it doesn't end with 2 digits
+        $this->assertEquals($generalCat->id, $issue['suggested_category_id']);
+    }
+
+    public function test_it_does_not_suggest_specific_category_if_general_is_correct(): void
+    {
+        $generalCat = AthleteCategory::factory()->create(['name' => 'U14 M', 'age_limit' => 13, 'genre' => 'm']);
+        $specificCat = AthleteCategory::factory()->create(['name' => 'U14 M12', 'age_limit' => 12, 'genre' => 'm']);
+        
+        // Athlete aged 12 (Fits in both, but General is preferred/correct)
+        $athlete = Athlete::factory()->create(['birthdate' => '2012-06-01', 'genre' => 'm']);
+        $event = Event::factory()->create(['date' => '2024-06-01']);
+        
+        $result = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'athlete_category_id' => $generalCat->id,
+            'event_id' => $event->id,
+        ]);
+
+        $diagnostics = collect($result->getDiagnostics());
+        $issue = $diagnostics->firstWhere('type', 'age_mismatch');
+
+        // Should NOT have an issue if already in the correct general category
+        $this->assertNull($issue, "Should not suggest optimizing to a specific category if already in a correct general one.");
     }
 }

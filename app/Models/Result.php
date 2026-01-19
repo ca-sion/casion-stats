@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Result extends Model
 {
     use HasFactory;
+    
+    /**
+     * Store temporary diagnostics for the model.
+     * @var array|null
+     */
+    public $diagnostics = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -142,6 +148,8 @@ class Result extends Model
                 if ($athleticAge != $this->athleteCategory->age_limit) {
                     $suggestedCategory = AthleteCategory::where('genre', $this->athlete->genre)
                         ->where('name', 'LIKE', '% ' . ($athleticAge < 10 ? '0' : '') . $athleticAge)
+                        ->get()
+                        ->sortBy(fn($cat) => preg_match('/\d{2}$/', $cat->name)) // Prioritize those WITHOUT age at the end
                         ->first();
 
                     $issues[] = [
@@ -161,6 +169,8 @@ class Result extends Model
                     $suggestedCategory = AthleteCategory::where('genre', $this->athlete->genre)
                         ->where('age_limit', '>=', $athleticAge)
                         ->orderBy('age_limit', 'asc')
+                        ->get()
+                        ->sortBy(fn($cat) => preg_match('/\d{2}$/', $cat->name)) // Prioritize general categories (U18 M) over specific ones (U16 M15)
                         ->first();
                     
                     if (!$suggestedCategory) {
@@ -179,18 +189,21 @@ class Result extends Model
                             ? "UPDATE results SET athlete_category_id = {$suggestedCategory->id} WHERE id = {$this->id};"
                             : null,
                     ];
-                } elseif ($this->athleteCategory->age_limit == 99) {
-                    // Check if a more specific category exists for this age
+                } else {
+                    // Check if a better general category exists for this age (Optimization)
+                    // We only suggest moving to a General category (no digits at end)
                     $optimalCategory = AthleteCategory::where('genre', $this->athlete->genre)
                         ->where('age_limit', '>=', $athleticAge)
-                        ->where('age_limit', '<', 99)
-                        ->orderBy('age_limit', 'asc')
+                        ->where('age_limit', '<=', $this->athleteCategory->age_limit)
+                        ->get()
+                        ->filter(fn($cat) => !preg_match('/\d{2}$/', $cat->name)) // Must be General
+                        ->sortBy('age_limit')
                         ->first();
 
-                    if ($optimalCategory) {
+                    if ($optimalCategory && $optimalCategory->id !== $this->athlete_category_id) {
                         $issues[] = [
                             'type' => 'age_mismatch',
-                            'label' => "Cat Senior ({$this->athleteCategory->name}) alors que {$optimalCategory->name} possible ({$athleticAge} ans)",
+                            'label' => "Cat {$this->athleteCategory->name} alors que {$optimalCategory->name} possible ({$athleticAge} ans)",
                             'severity' => 'info',
                             'suggested_category_id' => $optimalCategory->id,
                             'sql_fix' => "UPDATE results SET athlete_category_id = {$optimalCategory->id} WHERE id = {$this->id};",
