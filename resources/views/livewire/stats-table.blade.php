@@ -34,12 +34,20 @@
                     </ul>
                 </div>
             </div>
-            <select class="select select-bordered w-full" wire:model.live="categoryId">
-                <option value="">Choisir une catégorie</option>
-                @foreach ($athleteCategories as $athleteCategory)
-                <option value="{{ $athleteCategory->id }}">{{ $athleteCategory->name }}</option>
-                @endforeach
-            </select>
+            <div class="flex flex-col gap-1">
+                <select class="select select-bordered w-full" wire:model.live="categoryId">
+                    <option value="">Choisir une catégorie</option>
+                    @foreach ($athleteCategories as $athleteCategory)
+                    <option value="{{ $athleteCategory->id }}">{{ $athleteCategory->name }}</option>
+                    @endforeach
+                </select>
+                @if($categoryId && $athleteCategories->firstWhere('id', $categoryId)?->age_limit < 99)
+                <div class="flex items-center gap-2 px-1 py-1 animate-in fade-in duration-300">
+                    <input type="checkbox" class="checkbox checkbox-xs" id="inclusiveCategory" wire:model.live="inclusiveCategory" />
+                    <label for="inclusiveCategory" class="label-text text-[10px] cursor-pointer opacity-70 hover:opacity-100 transition-opacity">Inclure les plus jeunes</label>
+                </div>
+                @endif
+            </div>
             <select class="select select-bordered w-full" wire:model.live="genre">
                 <option value="">Choisir un genre</option>
                 <option value="m">Homme</option>

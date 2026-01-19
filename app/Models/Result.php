@@ -43,10 +43,22 @@ class Result extends Model
     /**
      * Scope a query to filter by athlete category.
      */
-    public function scopeForCategory($query, $categoryId)
+    public function scopeForCategory($query, $categoryId, $inclusive = false)
     {
-        return $query->when($categoryId, function ($query, $categoryId) {
-            $query->where('athlete_category_id', $categoryId);
+        return $query->when($categoryId, function ($query, $categoryId) use ($inclusive) {
+            if (!$inclusive) {
+                return $query->where('athlete_category_id', $categoryId);
+            }
+
+            $category = AthleteCategory::find($categoryId);
+            if (!$category || $category->age_limit === null || $category->age_limit == 99) {
+                return $query->where('athlete_category_id', $categoryId);
+            }
+
+            return $query->whereHas('athleteCategory', function ($q) use ($category) {
+                $q->where('genre', $category->genre)
+                  ->where('age_limit', '<=', $category->age_limit);
+            });
         });
     }
 

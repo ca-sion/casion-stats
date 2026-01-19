@@ -23,6 +23,9 @@ class StatsTable extends Component
     public $showOnlyErrors = false;
     public $showSql = false;
 
+    #[Url(as: 'inc')]
+    public $inclusiveCategory = false;
+
     public function mount()
     {
         $this->fix = session()->get('fix', false);
@@ -119,7 +122,7 @@ class StatsTable extends Component
         $query = \App\Models\Result::query()
             ->withRelations()
             ->forDiscipline($this->disciplineId)
-            ->forCategory($this->categoryId)
+            ->forCategory($this->categoryId, $this->inclusiveCategory)
             ->forGenre($this->genre)
             ->orderedByPerformance($discipline->sorting ?? 'asc');
 
