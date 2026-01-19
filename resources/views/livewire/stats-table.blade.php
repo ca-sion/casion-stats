@@ -2,12 +2,38 @@
 
     <div>
         <div class="flex flex-col gap-2">
-            <select class="select select-bordered w-full" wire:model.live="disciplineId">
-                <option disabled selected>Choisir une discipline</option>
-                @foreach ($disciplines as $discipline)
-                <option value="{{ $discipline->id }}">{{ $discipline->name }}</option>
-                @endforeach
-            </select>
+            <div x-data="{
+                open: false,
+                search: '',
+                disciplines: @js($disciplines),
+                get filteredDisciplines() {
+                    if (this.search === '') return this.disciplines;
+                    const s = this.search.toLowerCase();
+                    return this.disciplines.filter(d => d.name.toLowerCase().includes(s));
+                },
+                select(id) {
+                    $wire.set('disciplineId', id);
+                    this.open = false;
+                    this.search = '';
+                }
+            }" class="dropdown w-full" :class="open && 'dropdown-open'" @click.outside="open = false">
+                <div tabindex="0" role="button" class="select select-bordered w-full flex items-center justify-between" @click="open = !open">
+                    <span>{{ $disciplines->firstWhere('id', $disciplineId)?->name ?? 'Discipline' }}</span>
+                </div>
+                <div class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-1 border border-base-300">
+                    <input type="text" x-model="search" placeholder="Rechercher..." class="input input-sm input-bordered mb-2 w-full" autofocus @click.stop x-ref="searchInput" x-effect="if(open) $nextTick(() => $refs.searchInput.focus())">
+                    <ul class="max-h-60 overflow-y-auto flex flex-col gap-1">
+                        <template x-for="discipline in filteredDisciplines" :key="discipline.id">
+                            <li>
+                                <a @click="select(discipline.id)" :class="discipline.id == {{ $disciplineId }} && 'menu-active'">
+                                    <span x-text="discipline.name"></span>
+                                </a>
+                            </li>
+                        </template>
+                        <li x-show="filteredDisciplines.length === 0" class="p-2 text-center text-sm opacity-50">Aucun résultat</li>
+                    </ul>
+                </div>
+            </div>
             <select class="select select-bordered w-full" wire:model.live="categoryId">
                 <option value="">Choisir une catégorie</option>
                 @foreach ($athleteCategories as $athleteCategory)
