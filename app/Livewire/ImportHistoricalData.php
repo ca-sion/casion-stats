@@ -37,6 +37,13 @@ class ImportHistoricalData extends Component
         $this->service = $service;
     }
 
+    public function mount()
+    {
+        if (! app()->isLocal()) {
+            abort(403, 'Accès réservé à l\'environnement local.');
+        }
+    }
+
     public function updatedCsvFile()
     {
         $this->validate([
