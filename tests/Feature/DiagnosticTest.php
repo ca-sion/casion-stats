@@ -148,4 +148,27 @@ class DiagnosticTest extends TestCase
         $this->assertCount(1, $diagnostics->where('type', 'missing_birthdate'));
         $this->assertCount(0, $diagnostics->where('type', 'age_mismatch'));
     }
+
+    public function test_it_detects_suboptimal_senior_category(): void
+    {
+        $youthCat = AthleteCategory::factory()->create(['name' => 'U18 M', 'age_limit' => 17, 'genre' => 'm']);
+        $seniorCat = AthleteCategory::factory()->create(['name' => 'MAN', 'age_limit' => 99, 'genre' => 'm']);
+        
+        // Born in 2007, event in 2024 -> 17 years old (Could be in U18 M)
+        $athlete = Athlete::factory()->create(['birthdate' => '2007-06-01', 'genre' => 'm']);
+        $event = Event::factory()->create(['date' => '2024-06-01']);
+        
+        $result = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'athlete_category_id' => $seniorCat->id,
+            'event_id' => $event->id,
+        ]);
+
+        $diagnostics = collect($result->getDiagnostics());
+        $issue = $diagnostics->firstWhere('type', 'age_mismatch');
+
+        $this->assertNotNull($issue);
+        $this->assertStringContainsString('Cat Senior (MAN) alors que U18 M possible', $issue['label']);
+        $this->assertEquals($youthCat->id, $issue['suggested_category_id']);
+    }
 }

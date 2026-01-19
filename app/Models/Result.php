@@ -118,6 +118,7 @@ class Result extends Model
                 'type' => 'genre_mismatch',
                 'label' => "Genre {$this->athlete->genre} ≠ Cat {$this->athleteCategory->genre}",
                 'severity' => 'warning',
+                'sql_fix' => "UPDATE athletes SET genre = '{$this->athleteCategory->genre}' WHERE id = {$this->athlete->id};",
             ];
         }
 
@@ -130,6 +131,7 @@ class Result extends Model
                 'type' => 'missing_birthdate',
                 'label' => "Date de naissance manquante",
                 'severity' => 'warning',
+                'sql_fix' => "UPDATE athletes SET birthdate = 'YYYY-MM-DD' WHERE id = {$this->athlete->id};",
             ];
         } elseif ($this->athleteCategory->age_limit) {
             // Check if it's an "exact age" category (e.g. U10 W08, U16 M15)
@@ -138,20 +140,62 @@ class Result extends Model
 
             if ($isExactAge) {
                 if ($athleticAge != $this->athleteCategory->age_limit) {
+                    $suggestedCategory = AthleteCategory::where('genre', $this->athlete->genre)
+                        ->where('name', 'LIKE', '% ' . ($athleticAge < 10 ? '0' : '') . $athleticAge)
+                        ->first();
+
                     $issues[] = [
                         'type' => 'age_mismatch',
                         'label' => "Âge ({$athleticAge} ans) ≠ {$this->athleteCategory->age_limit} attendu",
                         'severity' => 'warning',
+                        'suggested_category_id' => $suggestedCategory?->id,
+                        'sql_fix' => $suggestedCategory 
+                            ? "UPDATE results SET athlete_category_id = {$suggestedCategory->id} WHERE id = {$this->id};"
+                            : null,
                     ];
                 }
             } else {
                 // Regular "Under" category
                 if ($athleticAge > $this->athleteCategory->age_limit) {
+                    // Find the smallest limit that is >= athletic age
+                    $suggestedCategory = AthleteCategory::where('genre', $this->athlete->genre)
+                        ->where('age_limit', '>=', $athleticAge)
+                        ->orderBy('age_limit', 'asc')
+                        ->first();
+                    
+                    if (!$suggestedCategory) {
+                        // Fallback to MAN/WOM if older than all limits
+                        $suggestedCategory = AthleteCategory::where('genre', $this->athlete->genre)
+                            ->where('age_limit', 99)
+                            ->first();
+                    }
+
                     $issues[] = [
                         'type' => 'age_mismatch',
                         'label' => "Âge ({$athleticAge} ans) > Limite {$this->athleteCategory->age_limit}",
                         'severity' => 'warning',
+                        'suggested_category_id' => $suggestedCategory?->id,
+                        'sql_fix' => $suggestedCategory 
+                            ? "UPDATE results SET athlete_category_id = {$suggestedCategory->id} WHERE id = {$this->id};"
+                            : null,
                     ];
+                } elseif ($this->athleteCategory->age_limit == 99) {
+                    // Check if a more specific category exists for this age
+                    $optimalCategory = AthleteCategory::where('genre', $this->athlete->genre)
+                        ->where('age_limit', '>=', $athleticAge)
+                        ->where('age_limit', '<', 99)
+                        ->orderBy('age_limit', 'asc')
+                        ->first();
+
+                    if ($optimalCategory) {
+                        $issues[] = [
+                            'type' => 'age_mismatch',
+                            'label' => "Cat Senior ({$this->athleteCategory->name}) alors que {$optimalCategory->name} possible ({$athleticAge} ans)",
+                            'severity' => 'info',
+                            'suggested_category_id' => $optimalCategory->id,
+                            'sql_fix' => "UPDATE results SET athlete_category_id = {$optimalCategory->id} WHERE id = {$this->id};",
+                        ];
+                    }
                 }
             }
         }
@@ -171,6 +215,7 @@ class Result extends Model
                 'type' => 'duplicate',
                 'label' => "Doublon potentiel (même jour)",
                 'severity' => 'info',
+                'sql_fix' => "DELETE FROM results WHERE id = {$this->id};",
             ];
         }
 
@@ -182,6 +227,7 @@ class Result extends Model
                 'type' => 'format_issue',
                 'label' => "Format performance suspect: '{$this->performance}'",
                 'severity' => 'info',
+                'sql_fix' => "UPDATE results SET performance = '{$this->performance}' WHERE id = {$this->id};", // User will need to edit '{$this->performance}'
             ];
         }
 

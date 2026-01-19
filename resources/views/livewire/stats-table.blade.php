@@ -57,6 +57,10 @@
                 <input type="checkbox" class="toggle toggle-info toggle-xs" id="showOnlyErrors" wire:model.live="showOnlyErrors" />
                 <label for="showOnlyErrors" class="label-text text-xs cursor-pointer">Erreurs uniquement</label>
             </div>
+            <div class="flex items-center gap-2 cursor-pointer animate-in fade-in duration-300">
+                <input type="checkbox" class="toggle toggle-secondary toggle-xs" id="showSql" wire:click="toggleSql" />
+                <label for="showSql" class="label-text text-xs cursor-pointer">Voir SQL</label>
+            </div>
             @endif
         </div>
     </div>
@@ -114,6 +118,9 @@
               <th>ID: athlète</th>
               <th>Genre</th>
               <th>Contrôle</th>
+              @if($canFix)
+              <th>Actions</th>
+              @endif
               @endif
             </tr>
           </thead>
@@ -160,6 +167,44 @@
                                 @endif
                                 {{ $diagnostic['label'] }}
                             </div>
+                            @if($showSql && isset($diagnostic['sql_fix']))
+                            <div class="text-[9px] font-mono bg-slate-100 p-1 rounded border overflow-x-auto max-w-[150px] mt-1">
+                                {{ $diagnostic['sql_fix'] }}
+                            </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </td>
+                @if($canFix)
+                <td>
+                    <div class="flex flex-col gap-1">
+                        @foreach ($result->diagnostics as $diagnostic)
+                            @if($diagnostic['type'] === 'genre_mismatch')
+                                <button wire:click="syncAthleteGenre({{ $result->athlete->id }}, '{{ $result->athleteCategory->genre }}')" 
+                                        class="btn btn-xs btn-outline btn-warning py-0 h-auto min-h-0 text-[9px] lowercase"
+                                        wire:loading.attr="disabled">
+                                    Fix Genre
+                                </button>
+                            @elseif($diagnostic['type'] === 'duplicate')
+                                <button wire:click="deleteResult({{ $result->id }})" 
+                                        class="btn btn-xs btn-outline btn-error py-0 h-auto min-h-0 text-[9px] lowercase"
+                                        wire:confirm="Supprimer ce résultat ?"
+                                        wire:loading.attr="disabled">
+                                    Delete
+                                </button>
+                            @elseif($diagnostic['type'] === 'age_mismatch' && isset($diagnostic['suggested_category_id']))
+                                <button wire:click="changeCategory({{ $result->id }}, {{ $diagnostic['suggested_category_id'] }})" 
+                                        class="btn btn-xs btn-outline btn-neutral py-0 h-auto min-h-0 text-[10px] lowercase"
+                                        wire:loading.attr="disabled">
+                                    Fix Catégorie
+                                </button>
+                            @elseif($diagnostic['type'] === 'format_issue')
+                                <button onclick="let p = prompt('Nouvelle performance:', '{{ $result->performance }}'); if(p) @this.call('updatePerformance', {{ $result->id }}, p)" 
+                                        class="btn btn-xs btn-outline btn-info py-0 h-auto min-h-0 text-[10px] lowercase"
+                                        wire:loading.attr="disabled">
+                                    Fix Perf
+                                </button>
+                            @endif
                         @endforeach
                         @if(empty($result->diagnostics))
                             <span class="text-green-600">
@@ -170,6 +215,7 @@
                         @endif
                     </div>
                 </td>
+                @endif
                 @endif
               </tr>
             @endforeach
