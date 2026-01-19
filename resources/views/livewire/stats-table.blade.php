@@ -9,7 +9,7 @@
                 get filteredDisciplines() {
                     if (this.search === '') return this.disciplines;
                     const s = this.search.toLowerCase();
-                    return this.disciplines.filter(d => (d.name || '').toLowerCase().includes(s));
+                    return this.disciplines.filter(d => (d.name_fr || '').toLowerCase().includes(s));
                 },
                 select(id) {
                     $wire.set('disciplineId', id);
@@ -23,7 +23,7 @@
                 <button type="button" 
                         class="select select-bordered w-full flex items-center justify-between bg-base-100" 
                         @click="open = !open">
-                    <span class="truncate">{{ $disciplines->firstWhere('id', $disciplineId)?->name ?? 'Discipline' }}</span>
+                    <span class="truncate">{{ $disciplines->firstWhere('id', $disciplineId)?->name_fr ?? 'Discipline' }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 opacity-40 transition-transform duration-200" :class="open && 'rotate-180'">
                         <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                     </svg>
@@ -55,7 +55,7 @@
                                         @click="select(discipline.id)" 
                                         :class="discipline.id == @js($disciplineId) ? 'bg-primary text-primary-content hover:bg-primary-focus' : 'hover:bg-base-200'" 
                                         class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 text-sm">
-                                    <span x-text="discipline.name"></span>
+                                    <span x-text="discipline.name_fr"></span>
                                 </button>
                             </li>
                         </template>

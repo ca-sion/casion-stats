@@ -26,7 +26,7 @@ class StatsTableTest extends TestCase
      */
     public function test_component_renders(): void
     {
-        Discipline::factory()->create(['name' => '100m', 'order' => 1]);
+        Discipline::factory()->create(['name_fr' => '100m', 'order' => 1]);
 
         Livewire::test(\App\Livewire\StatsTable::class)
             ->assertStatus(200)
@@ -38,8 +38,8 @@ class StatsTableTest extends TestCase
      */
     public function test_filters_by_discipline_and_sorts_by_order(): void
     {
-        $d2 = Discipline::factory()->create(['name' => '200m', 'order' => 2]);
-        $d1 = Discipline::factory()->create(['name' => '100m', 'order' => 1]);
+        $d2 = Discipline::factory()->create(['name_fr' => '200m', 'order' => 2]);
+        $d1 = Discipline::factory()->create(['name_fr' => '100m', 'order' => 1]);
 
         Livewire::test(\App\Livewire\StatsTable::class)
             ->assertSet('disciplineId', $d1->id) // Should default to first by order

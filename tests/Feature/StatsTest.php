@@ -16,8 +16,8 @@ class StatsTest extends TestCase
 
     public function test_stats_can_be_filtered_by_discipline(): void
     {
-        $discipline1 = Discipline::factory()->create(['name' => '100m']);
-        $discipline2 = Discipline::factory()->create(['name' => '200m']);
+        $discipline1 = Discipline::factory()->create(['name_fr' => '100m']);
+        $discipline2 = Discipline::factory()->create(['name_fr' => '200m']);
         
         Result::factory()->create(['discipline_id' => $discipline1->id]);
         Result::factory()->create(['discipline_id' => $discipline2->id]);

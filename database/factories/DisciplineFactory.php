@@ -17,7 +17,7 @@ class DisciplineFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name_fr' => $this->faker->word(),
             'sorting' => 'asc',
         ];
     }

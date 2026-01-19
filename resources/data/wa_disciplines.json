@@ -1,0 +1,1312 @@
+[
+  {
+    "lanet_id": "8",
+    "code": "30M",
+    "name": "30m",
+    "seltec_code": "30M",
+    "order": "10",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "404",
+    "code": "55M",
+    "name": "55m",
+    "seltec_code": "55M",
+    "order": "11",
+    "wind": true,
+    "wa_discipline": "55 Metres",
+    "wa_discipline_code": "55"
+  },
+  {
+    "lanet_id": "355",
+    "code": "35M",
+    "name": "35m",
+    "seltec_code": "35M",
+    "order": "12",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "9",
+    "code": "50M",
+    "name": "50m",
+    "seltec_code": "50M",
+    "order": "20",
+    "wind": true,
+    "wa_discipline": "50 Metres",
+    "wa_discipline_code": "50"
+  },
+  {
+    "lanet_id": "10",
+    "code": "60M",
+    "name": "60m",
+    "seltec_code": "60M",
+    "order": "30",
+    "wind": true,
+    "wa_discipline": "60 Metres",
+    "wa_discipline_code": "60"
+  },
+  {
+    "lanet_id": "11",
+    "code": "75M",
+    "name": "75m",
+    "seltec_code": "75M",
+    "order": "40",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "383",
+    "code": "80M",
+    "name": "80m",
+    "seltec_code": "80M",
+    "order": "45",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "1",
+    "code": "100",
+    "name": "100m",
+    "seltec_code": "100",
+    "order": "50",
+    "wind": true,
+    "wa_discipline": "100 Metres",
+    "wa_discipline_code": "100"
+  },
+  {
+    "lanet_id": "333",
+    "code": "150",
+    "name": "150m",
+    "seltec_code": "150",
+    "order": "55",
+    "wind": true,
+    "wa_discipline": "150 Metres",
+    "wa_discipline_code": "150"
+  },
+  {
+    "lanet_id": "2",
+    "code": "200",
+    "name": "200m",
+    "seltec_code": "200",
+    "order": "70",
+    "wind": true,
+    "wa_discipline": "200 Metres",
+    "wa_discipline_code": "200"
+  },
+  {
+    "lanet_id": "144",
+    "code": "300",
+    "name": "300m",
+    "seltec_code": "300",
+    "order": "80",
+    "wind": false,
+    "wa_discipline": "300 Metres",
+    "wa_discipline_code": "300"
+  },
+  {
+    "lanet_id": "145",
+    "code": "400",
+    "name": "400m",
+    "seltec_code": "400",
+    "order": "90",
+    "wind": false,
+    "wa_discipline": "400 Metres",
+    "wa_discipline_code": "400"
+  },
+  {
+    "lanet_id": "414",
+    "code": "500",
+    "name": "500m",
+    "seltec_code": "500",
+    "order": "99",
+    "wind": false,
+    "wa_discipline": "500 Metres",
+    "wa_discipline_code": "500"
+  },
+  {
+    "lanet_id": "183",
+    "code": "600",
+    "name": "600m",
+    "seltec_code": "600",
+    "order": "100",
+    "wind": false,
+    "wa_discipline": "600 Metres",
+    "wa_discipline_code": "600"
+  },
+  {
+    "lanet_id": "146",
+    "code": "800",
+    "name": "800m",
+    "seltec_code": "800",
+    "order": "110",
+    "wind": false,
+    "wa_discipline": "800 Metres",
+    "wa_discipline_code": "800"
+  },
+  {
+    "lanet_id": "147",
+    "code": "1K0",
+    "name": "1000m",
+    "seltec_code": "1K0",
+    "order": "120",
+    "wind": false,
+    "wa_discipline": "1000 Metres",
+    "wa_discipline_code": "1000"
+  },
+  {
+    "lanet_id": "148",
+    "code": "1K5",
+    "name": "1500m",
+    "seltec_code": "1K5",
+    "order": "130",
+    "wind": false,
+    "wa_discipline": "1500 Metres",
+    "wa_discipline_code": "1500"
+  },
+  {
+    "lanet_id": "149",
+    "code": "MIL",
+    "name": "Mile",
+    "seltec_code": "MEI",
+    "order": "140",
+    "wind": false,
+    "wa_discipline": "Mile",
+    "wa_discipline_code": "MILE"
+  },
+  {
+    "lanet_id": "328",
+    "code": "2MIL",
+    "name": "2 Mile",
+    "seltec_code": "2MEI",
+    "order": "141",
+    "wind": false,
+    "wa_discipline": "2 Miles",
+    "wa_discipline_code": "2MLS"
+  },
+  {
+    "lanet_id": "150",
+    "code": "2K0",
+    "name": "2000m",
+    "seltec_code": "2K0",
+    "order": "150",
+    "wind": false,
+    "wa_discipline": "2000 Metres",
+    "wa_discipline_code": "2000"
+  },
+  {
+    "lanet_id": "151",
+    "code": "3K0",
+    "name": "3000m",
+    "seltec_code": "3K0",
+    "order": "160",
+    "wind": false,
+    "wa_discipline": "3000 Metres",
+    "wa_discipline_code": "3000"
+  },
+  {
+    "lanet_id": "152",
+    "code": "5K0",
+    "name": "5000m",
+    "seltec_code": "5K0",
+    "order": "170",
+    "wind": false,
+    "wa_discipline": "5000 Metres",
+    "wa_discipline_code": "5000"
+  },
+  {
+    "lanet_id": "153",
+    "code": "10K",
+    "name": "10000m",
+    "seltec_code": "10K",
+    "order": "180",
+    "wind": false,
+    "wa_discipline": "10,000 Metres",
+    "wa_discipline_code": "10K"
+  },
+  {
+    "lanet_id": "304",
+    "code": "5S",
+    "name": "5km",
+    "seltec_code": "5S",
+    "order": "200",
+    "wind": false,
+    "wa_discipline": "5 Kilometres Road",
+    "wa_discipline_code": "5RR"
+  },
+  {
+    "lanet_id": "343",
+    "code": "5T",
+    "name": "Équipe de 5km",
+    "seltec_code": "5M",
+    "order": "201",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "305",
+    "code": "7R5",
+    "name": "7,5km",
+    "seltec_code": "7S5",
+    "order": "210",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "297",
+    "code": "10S",
+    "name": "10km",
+    "seltec_code": "10S",
+    "order": "220",
+    "wind": false,
+    "wa_discipline": "10 Kilometres Road",
+    "wa_discipline_code": "10RR"
+  },
+  {
+    "lanet_id": "344",
+    "code": "10T",
+    "name": "Équipe de 10km",
+    "seltec_code": "10M",
+    "order": "221",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "298",
+    "code": "15S",
+    "name": "15km",
+    "seltec_code": "15S",
+    "order": "230",
+    "wind": false,
+    "wa_discipline": "15 Kilometres Road",
+    "wa_discipline_code": "15RR"
+  },
+  {
+    "lanet_id": "299",
+    "code": "HAL",
+    "name": "Demimarathon",
+    "seltec_code": "HAL",
+    "order": "240",
+    "wind": false,
+    "wa_discipline": "Half Marathon",
+    "wa_discipline_code": "HMAR"
+  },
+  {
+    "lanet_id": "345",
+    "code": "HALT",
+    "name": "Équipe de demimarathon",
+    "seltec_code": "HALM",
+    "order": "241",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "300",
+    "code": "25S",
+    "name": "25km",
+    "seltec_code": "25S",
+    "order": "250",
+    "wind": false,
+    "wa_discipline": "25 Kilometres Road",
+    "wa_discipline_code": "25RR"
+  },
+  {
+    "lanet_id": "301",
+    "code": "MAR",
+    "name": "Marathon",
+    "seltec_code": "MAR",
+    "order": "260",
+    "wind": false,
+    "wa_discipline": "Marathon",
+    "wa_discipline_code": "MAR"
+  },
+  {
+    "lanet_id": "330",
+    "code": "MAT",
+    "name": "Équipe de marathon",
+    "seltec_code": "MAM",
+    "order": "261",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "382",
+    "code": "50S",
+    "name": "50km",
+    "seltec_code": "50S",
+    "order": "265",
+    "wind": false,
+    "wa_discipline": "50 Kilometres Road",
+    "wa_discipline_code": "50RR"
+  },
+  {
+    "lanet_id": "302",
+    "code": "100S",
+    "name": "100km",
+    "seltec_code": "100S",
+    "order": "270",
+    "wind": false,
+    "wa_discipline": "100 Kilometres Road",
+    "wa_discipline_code": "100K"
+  },
+  {
+    "lanet_id": "346",
+    "code": "100T",
+    "name": "Équipe de 100km",
+    "seltec_code": "100M",
+    "order": "272",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "435",
+    "code": "2HOUR",
+    "name": "1 Heures",
+    "seltec_code": "2STL",
+    "order": "298",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "193",
+    "code": "HOUR",
+    "name": "1 Heure",
+    "seltec_code": "STL",
+    "order": "298",
+    "wind": false,
+    "wa_discipline": "One Hour",
+    "wa_discipline_code": "HOUR"
+  },
+  {
+    "lanet_id": "357",
+    "code": "RUN",
+    "name": "course",
+    "seltec_code": "LAUF",
+    "order": "299",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "374",
+    "code": "30MH",
+    "name": "30m haies",
+    "seltec_code": "30MH",
+    "order": "300",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "356",
+    "code": "35MH",
+    "name": "35m haies",
+    "seltec_code": "35MH",
+    "order": "301",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "154",
+    "code": "50H",
+    "name": "50m haies",
+    "seltec_code": "50H",
+    "order": "302",
+    "wind": true,
+    "wa_discipline": "50 Metres Hurdles",
+    "wa_discipline_code": "50H"
+  },
+  {
+    "lanet_id": "155",
+    "code": "60H",
+    "name": "60m haies",
+    "seltec_code": "60H",
+    "order": "310",
+    "wind": true,
+    "wa_discipline": "60 Metres Hurdles",
+    "wa_discipline_code": "60H"
+  },
+  {
+    "lanet_id": "156",
+    "code": "80H",
+    "name": "80m haies",
+    "seltec_code": "80H",
+    "order": "320",
+    "wind": true,
+    "wa_discipline": "80 Metres Hurdles",
+    "wa_discipline_code": "80H"
+  },
+  {
+    "lanet_id": "157",
+    "code": "10H",
+    "name": "100m haies",
+    "seltec_code": "10H",
+    "order": "330",
+    "wind": true,
+    "wa_discipline": "100 Metres Hurdles",
+    "wa_discipline_code": "100H"
+  },
+  {
+    "lanet_id": "158",
+    "code": "11H",
+    "name": "110m haies",
+    "seltec_code": "11H",
+    "order": "340",
+    "wind": true,
+    "wa_discipline": "110 Metres Hurdles",
+    "wa_discipline_code": "110H"
+  },
+  {
+    "lanet_id": "360",
+    "code": "20H",
+    "name": "200m haies",
+    "seltec_code": "20H",
+    "order": "349",
+    "wind": true,
+    "wa_discipline": "200 Metres Hurdles",
+    "wa_discipline_code": "200H"
+  },
+  {
+    "lanet_id": "159",
+    "code": "30H",
+    "name": "300m haies",
+    "seltec_code": "30H",
+    "order": "350",
+    "wind": false,
+    "wa_discipline": "300 Metres Hurdles",
+    "wa_discipline_code": "300H"
+  },
+  {
+    "lanet_id": "160",
+    "code": "40H",
+    "name": "400m haies",
+    "seltec_code": "40H",
+    "order": "360",
+    "wind": false,
+    "wa_discipline": "400 Metres Hurdles",
+    "wa_discipline_code": "400H"
+  },
+  {
+    "lanet_id": "161",
+    "code": "15SC",
+    "name": "1500m steeple",
+    "seltec_code": "15H",
+    "order": "370",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "162",
+    "code": "2SC",
+    "name": "2000m steeple",
+    "seltec_code": "2KH",
+    "order": "380",
+    "wind": false,
+    "wa_discipline": "2000 Metres Steeplechase",
+    "wa_discipline_code": "2KSC"
+  },
+  {
+    "lanet_id": "163",
+    "code": "3SC",
+    "name": "3000m steeple",
+    "seltec_code": "3KH",
+    "order": "390",
+    "wind": false,
+    "wa_discipline": "3000 Metres Steeplechase",
+    "wa_discipline_code": "3KSC"
+  },
+  {
+    "lanet_id": "164",
+    "code": "4X5",
+    "name": "4x50m",
+    "seltec_code": "4X5",
+    "order": "400",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "278",
+    "code": "6X5",
+    "name": "6x50m",
+    "seltec_code": "6X5",
+    "order": "401",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "165",
+    "code": "4X7",
+    "name": "4x75m",
+    "seltec_code": "4X7",
+    "order": "410",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "365",
+    "code": "5X8",
+    "name": "5x80m",
+    "seltec_code": "5X8",
+    "order": "415",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "391",
+    "code": "5XF",
+    "name": "5xlibre",
+    "seltec_code": "5XF",
+    "order": "416",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "393",
+    "code": "6XF",
+    "name": "6xlibre",
+    "seltec_code": "6XF",
+    "order": "416",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "166",
+    "code": "4X1",
+    "name": "4x100m",
+    "seltec_code": "4X1",
+    "order": "420",
+    "wind": false,
+    "wa_discipline": "4x100 Metres Relay",
+    "wa_discipline_code": "4X1"
+  },
+  {
+    "lanet_id": "167",
+    "code": "4X2",
+    "name": "4x200m",
+    "seltec_code": "4X2",
+    "order": "431",
+    "wind": false,
+    "wa_discipline": "4x200 Metres Relay",
+    "wa_discipline_code": "4X2"
+  },
+  {
+    "lanet_id": "168",
+    "code": "4X4",
+    "name": "4x400m",
+    "seltec_code": "4X4",
+    "order": "435",
+    "wind": false,
+    "wa_discipline": "4x400 Metres Relay",
+    "wa_discipline_code": "4X4"
+  },
+  {
+    "lanet_id": "169",
+    "code": "3X8",
+    "name": "3x800m",
+    "seltec_code": "3X8",
+    "order": "440",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "170",
+    "code": "4X8",
+    "name": "4x800m",
+    "seltec_code": "4X8",
+    "order": "450",
+    "wind": false,
+    "wa_discipline": "4x800 Metres Relay",
+    "wa_discipline_code": "4X8"
+  },
+  {
+    "lanet_id": "371",
+    "code": "6X8",
+    "name": "6x800m",
+    "seltec_code": "6X8",
+    "order": "451",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "171",
+    "code": "3X1",
+    "name": "3x1000m",
+    "seltec_code": "3X1",
+    "order": "460",
+    "wind": false,
+    "wa_discipline": "3x100 Metres Relay",
+    "wa_discipline_code": "3X1"
+  },
+  {
+    "lanet_id": "387",
+    "code": "AME",
+    "name": "Américaine",
+    "seltec_code": "AME",
+    "order": "465",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "172",
+    "code": "4X0",
+    "name": "4x1500m",
+    "seltec_code": "4X0",
+    "order": "470",
+    "wind": false,
+    "wa_discipline": "4x1500 Metres Relay",
+    "wa_discipline_code": "4X15"
+  },
+  {
+    "lanet_id": "192",
+    "code": "OLY",
+    "name": "Olympique",
+    "seltec_code": "OLY",
+    "order": "490",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "366",
+    "code": "MED",
+    "name": "Suédois",
+    "seltec_code": "SWE",
+    "order": "491",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "366",
+    "code": "SWE",
+    "name": "Suédois",
+    "seltec_code": "SWE",
+    "order": "491",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "173",
+    "code": "REL",
+    "name": "Relais",
+    "seltec_code": "STF",
+    "order": "495",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "187",
+    "code": "1W",
+    "name": "1000m walk",
+    "seltec_code": "1G",
+    "order": "500",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "199",
+    "code": "1KW",
+    "name": "1km walk",
+    "seltec_code": "1KG",
+    "order": "505",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "188",
+    "code": "2W",
+    "name": "2000m walk",
+    "seltec_code": "2G",
+    "order": "510",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "195",
+    "code": "2KW",
+    "name": "2km walk",
+    "seltec_code": "2KG",
+    "order": "515",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "189",
+    "code": "3W",
+    "name": "3000m walk",
+    "seltec_code": "3G",
+    "order": "520",
+    "wind": false,
+    "wa_discipline": "3000 Metres Race Walk",
+    "wa_discipline_code": "3KW"
+  },
+  {
+    "lanet_id": "196",
+    "code": "3KW",
+    "name": "3km walk",
+    "seltec_code": "3KG",
+    "order": "525",
+    "wind": false,
+    "wa_discipline": "3000 Metres Race Walk",
+    "wa_discipline_code": "3KW"
+  },
+  {
+    "lanet_id": "190",
+    "code": "5W",
+    "name": "5000m walk",
+    "seltec_code": "5G",
+    "order": "530",
+    "wind": false,
+    "wa_discipline": "5000 Metres Race Walk",
+    "wa_discipline_code": "5KW"
+  },
+  {
+    "lanet_id": "197",
+    "code": "5KW",
+    "name": "5km walk",
+    "seltec_code": "5KG",
+    "order": "535",
+    "wind": false,
+    "wa_discipline": "5000 Metres Race Walk",
+    "wa_discipline_code": "5KW"
+  },
+  {
+    "lanet_id": "191",
+    "code": "10W",
+    "name": "10000m walk",
+    "seltec_code": "10G",
+    "order": "540",
+    "wind": false,
+    "wa_discipline": "10,000 Metres Race Walk",
+    "wa_discipline_code": "10KW"
+  },
+  {
+    "lanet_id": "198",
+    "code": "10KW",
+    "name": "10km walk",
+    "seltec_code": "10KG",
+    "order": "545",
+    "wind": false,
+    "wa_discipline": "10,000 Metres Race Walk",
+    "wa_discipline_code": "10KW"
+  },
+  {
+    "lanet_id": "348",
+    "code": "10KWT",
+    "name": "Équipe de 10km walk",
+    "seltec_code": "10KGM",
+    "order": "546",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "194",
+    "code": "20W",
+    "name": "20000m walk",
+    "seltec_code": "20G",
+    "order": "550",
+    "wind": false,
+    "wa_discipline": "20,000 Metres Race Walk",
+    "wa_discipline_code": "20KW"
+  },
+  {
+    "lanet_id": "200",
+    "code": "20KW",
+    "name": "20km walk",
+    "seltec_code": "20KG",
+    "order": "555",
+    "wind": false,
+    "wa_discipline": "20,000 Metres Race Walk",
+    "wa_discipline_code": "20KW"
+  },
+  {
+    "lanet_id": "349",
+    "code": "20KWT",
+    "name": "Équipe de 20km walk",
+    "seltec_code": "20KGM",
+    "order": "556",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "314",
+    "code": "30KW",
+    "name": "30km Walk",
+    "seltec_code": "30KG",
+    "order": "560",
+    "wind": false,
+    "wa_discipline": "30,000 Metres Race Walk",
+    "wa_discipline_code": "30KW"
+  },
+  {
+    "lanet_id": "427",
+    "code": "35KWT",
+    "name": "Équipe de 35km walk",
+    "seltec_code": "35KGM",
+    "order": "561",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "426",
+    "code": "30KWT",
+    "name": "Équipe de 30km walk",
+    "seltec_code": "30KGM",
+    "order": "561",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "405",
+    "code": "35KW",
+    "name": "35km walk",
+    "seltec_code": "35KG",
+    "order": "562",
+    "wind": false,
+    "wa_discipline": "35,000 Metres Race Walk",
+    "wa_discipline_code": "35KW"
+  },
+  {
+    "lanet_id": "201",
+    "code": "50KW",
+    "name": "50km walk",
+    "seltec_code": "50KG",
+    "order": "563",
+    "wind": false,
+    "wa_discipline": "50,000 Metres Race Walk",
+    "wa_discipline_code": "50KW"
+  },
+  {
+    "lanet_id": "350",
+    "code": "50KWT",
+    "name": "Équipe de 50km walk",
+    "seltec_code": "50KGM",
+    "order": "564",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "3",
+    "code": "HJ",
+    "name": "Hauteur",
+    "seltec_code": "HOC",
+    "order": "600",
+    "wind": false,
+    "wa_discipline": "High Jump",
+    "wa_discipline_code": "HJ"
+  },
+  {
+    "lanet_id": "174",
+    "code": "PV",
+    "name": "Perche",
+    "seltec_code": "STA",
+    "order": "619",
+    "wind": false,
+    "wa_discipline": "Pole Vault",
+    "wa_discipline_code": "PV"
+  },
+  {
+    "lanet_id": "7",
+    "code": "LJ",
+    "name": "Longueur",
+    "seltec_code": "WEI",
+    "order": "620",
+    "wind": true,
+    "wa_discipline": "Long Jump",
+    "wa_discipline_code": "LJ"
+  },
+  {
+    "lanet_id": "184",
+    "code": "WEZ",
+    "name": "Longueur (zone)",
+    "seltec_code": "WEZ",
+    "order": "620",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "175",
+    "code": "TJ",
+    "name": "Triple",
+    "seltec_code": "DRE",
+    "order": "630",
+    "wind": true,
+    "wa_discipline": "Triple Jump",
+    "wa_discipline_code": "TJ"
+  },
+  {
+    "lanet_id": "407",
+    "code": "PLJ",
+    "name": "Perche en longueur",
+    "seltec_code": "STB",
+    "order": "640",
+    "wind": true,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "408",
+    "code": "RT",
+    "name": "Lancer en rotation",
+    "seltec_code": "DW",
+    "order": "700",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "6",
+    "code": "SP",
+    "name": "Poids",
+    "seltec_code": "KUG",
+    "order": "700",
+    "wind": false,
+    "wa_discipline": "Shot Put",
+    "wa_discipline_code": "SP"
+  },
+  {
+    "lanet_id": "176",
+    "code": "DT",
+    "name": "Disque",
+    "seltec_code": "DIS",
+    "order": "710",
+    "wind": false,
+    "wa_discipline": "Discus Throw",
+    "wa_discipline_code": "DT"
+  },
+  {
+    "lanet_id": "177",
+    "code": "HT",
+    "name": "Marteau",
+    "seltec_code": "HAM",
+    "order": "720",
+    "wind": false,
+    "wa_discipline": "Hammer Throw",
+    "wa_discipline_code": "HT"
+  },
+  {
+    "lanet_id": "178",
+    "code": "JT",
+    "name": "Javelot",
+    "seltec_code": "SPE",
+    "order": "730",
+    "wind": false,
+    "wa_discipline": "Javelin Throw",
+    "wa_discipline_code": "JT"
+  },
+  {
+    "lanet_id": "179",
+    "code": "BAL",
+    "name": "Balle",
+    "seltec_code": "BAL",
+    "order": "740",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "180",
+    "code": "SCH",
+    "name": "Balle 80g",
+    "seltec_code": "SCH",
+    "order": "750",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "186",
+    "code": "VOR",
+    "name": "Vortex",
+    "seltec_code": "VOR",
+    "order": "790",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "389",
+    "code": "UKC",
+    "name": "UBS Kids Cup",
+    "seltec_code": "UKC",
+    "order": "5008",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "434",
+    "code": "4HK",
+    "name": "Quadrathlon",
+    "seltec_code": "4-KH",
+    "order": "5019",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "315",
+    "code": "5HK",
+    "name": "Penthathlon",
+    "seltec_code": "5-KH",
+    "order": "5020",
+    "wind": false,
+    "wa_discipline": "Pentathlon",
+    "wa_discipline_code": "PEN"
+  },
+  {
+    "lanet_id": "284",
+    "code": "5-K",
+    "name": "Pentathlon",
+    "seltec_code": "5-K",
+    "order": "5020",
+    "wind": false,
+    "wa_discipline": "Pentathlon",
+    "wa_discipline_code": "PEN"
+  },
+  {
+    "lanet_id": "337",
+    "code": "5-KM",
+    "name": "Équipe de pentathlon",
+    "seltec_code": "5-KM",
+    "order": "5021",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "368",
+    "code": "7-KH",
+    "name": "Heptathlon",
+    "seltec_code": "7-KH",
+    "order": "5029",
+    "wind": false,
+    "wa_discipline": "Heptathlon",
+    "wa_discipline_code": "HEP"
+  },
+  {
+    "lanet_id": "285",
+    "code": "HEP",
+    "name": "Heptathlon",
+    "seltec_code": "7-K",
+    "order": "5030",
+    "wind": false,
+    "wa_discipline": "Heptathlon",
+    "wa_discipline_code": "HEP"
+  },
+  {
+    "lanet_id": "334",
+    "code": "HEPT",
+    "name": "Équipe de heptathlon",
+    "seltec_code": "7-KM",
+    "order": "5031",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "384",
+    "code": "6-K",
+    "name": "Hexathlon",
+    "seltec_code": "6-K",
+    "order": "5035",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "385",
+    "code": "8-K",
+    "name": "Octathlon",
+    "seltec_code": "8-K",
+    "order": "5036",
+    "wind": false,
+    "wa_discipline": "Octathlon U16",
+    "wa_discipline_code": "OCT"
+  },
+  {
+    "lanet_id": "281",
+    "code": "DEC",
+    "name": "Décathlon",
+    "seltec_code": "10-K",
+    "order": "5050",
+    "wind": false,
+    "wa_discipline": "Decathlon",
+    "wa_discipline_code": "DEC"
+  },
+  {
+    "lanet_id": "296",
+    "code": "DECT",
+    "name": "Équipe de décathlon",
+    "seltec_code": "10-M",
+    "order": "5051",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "332",
+    "code": "MUL",
+    "name": "Concours multiple",
+    "seltec_code": "MK",
+    "order": "5090",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "420",
+    "code": "MULT",
+    "name": "Equipe concours multiple",
+    "seltec_code": "MKM",
+    "order": "5139",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "398",
+    "code": "PLB",
+    "name": "CSI Ligue de promotion B",
+    "seltec_code": "PLB",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "401",
+    "code": "SVMM",
+    "name": "CSI Concours par équipe",
+    "seltec_code": "SVMM",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "416",
+    "code": "TSM",
+    "name": "CS Team",
+    "seltec_code": "TSM",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "403",
+    "code": "SVM",
+    "name": "CSI Individuel",
+    "seltec_code": "SVM",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "395",
+    "code": "NLB",
+    "name": "CSI Ligue nationale B",
+    "seltec_code": "NLB",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "397",
+    "code": "PLA",
+    "name": "CSI Ligue de promotion A",
+    "seltec_code": "PLA",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "400",
+    "code": "JL",
+    "name": "CSI Ligue des juniors",
+    "seltec_code": "JL",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "390",
+    "code": "NLA",
+    "name": "CSI Ligue nationale B",
+    "seltec_code": "NLA",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "402",
+    "code": "SVMMK",
+    "name": "CSI Concours multiple",
+    "seltec_code": "SVMMK",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "396",
+    "code": "NLC",
+    "name": "CSI Ligue nationale C",
+    "seltec_code": "NLC",
+    "order": "6001",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  },
+  {
+    "lanet_id": "312",
+    "code": "CUP",
+    "name": "Concours par équipe",
+    "seltec_code": "CUP",
+    "order": "6050",
+    "wind": false,
+    "wa_discipline": null,
+    "wa_discipline_code": null
+  }
+]
