@@ -1,6 +1,23 @@
 # CA Sion - Statistiques
 
-Ce projet est une application web de gestion et de consultation des statistiques de performance pour le Club d'Athlétisme (CA) Sion. Il permet de centraliser et d'analyser les résultats des athlètes sur différentes disciplines à travers les années (jusqu'en 2016).
+Ce projet est une application web de gestion et de consultation des statistiques de performance pour le Club d'Athlétisme (CA) Sion. Il permet de centraliser et d'analyser les résultats des athlètes sur différentes disciplines à travers les années (de 1959 à juin 2017).
+
+## 📜 Historique des Données
+
+Ce module a été créé le **12 décembre 2014 par Michael Ravedoni**. Il repose sur une architecture de données alimentée et consolidée par plusieurs contributeurs au fil des ans :
+
+- **Période 1997 - 2012** : Base de données initialement alimentée par **René de Voogd**.
+- **Archives 1962 - 2010** : Reprise d'anciennes bases de résultats. Notez que ces données historiques peuvent contenir des approximations ou des erreurs (résultats, disciplines, noms ou dates).
+- **État des lieux actuel** : Les résultats sont globalement complets jusqu'en **juin 2017**.
+
+### ⚠️ Lacunes et Trous de données
+L'analyse de la base de données révèle quelques zones d'ombre importantes :
+- **2013** : Absence totale de résultats (trou de données).
+- **2014** : Seuls quelques résultats partiels (environ 60) sont enregistrés.
+- **2017+** : Les données s'arrêtent après les championnats valaisans de juin 2017. Le vide entre 2017 et aujourd'hui reste à combler.
+
+> [!TIP]
+> Si vous possédez des archives pour combler ces trous ou si vous constatez une erreur, vos réclamations et annonces sont les bienvenues pour améliorer la précision des statistiques du club !
 
 ## 🚀 Fonctionnalités
 
