@@ -15,3 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'show']);
+Route::get('/athletes/{athlete}', [App\Http\Controllers\AthleteController::class, 'show'])->name('athletes.show');

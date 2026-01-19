@@ -18,6 +18,15 @@ class Result extends Model
     protected $guarded = [];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'performance_normalized' => 'float',
+    ];
+
+    /**
      * Scope a query to filter by discipline.
      */
     public function scopeForDiscipline($query, $disciplineId)
