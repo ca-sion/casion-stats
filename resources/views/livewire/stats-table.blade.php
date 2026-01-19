@@ -172,6 +172,7 @@
               <th></th>
               <th>Athlète</th>
               <th>Performance</th>
+              <th>Âge</th>
               <th>Année</th>
               <th>Compétition</th>
               <th>Lieu</th>
@@ -199,11 +200,7 @@
                         </a>
                         @if ($isFix)
                         <span class="text-[10px] opacity-70">
-                            @if($result->athlete->birthdate->year > 1900)
-                                {{ $result->athlete->birthdate->format('Y') }} ({{ $result->event->date->year - $result->athlete->birthdate->year }} ans)
-                            @else
-                                <span class="text-orange-600 font-semibold italic">Année inconnue</span>
-                            @endif
+                            ID: {{ $result->athlete->id }}
                         </span>
                         @endif
                     </div>
@@ -211,7 +208,10 @@
                 <td @if($isFix && collect($result->diagnostics)->contains('type', 'format_issue')) class="text-orange-700 font-bold" @endif>
                     {{ $result->performance }}
                 </td>
-                <td>{{ $result->event->date->format('Y') }}</td>
+                <td class="text-center tabular-nums opacity-60">
+                    {{ $result->athlete_age ? $result->athlete_age . ' ans' : '—' }}
+                </td>
+                <td class="tabular-nums">{{ $result->event->date->format('Y') }}</td>
                 <td class="max-w-xs truncate">{{ $result->event->name }}</td>
                 <td>{{ $result->event->location }}</td>
                 <td>{{ $result->rank }}</td>

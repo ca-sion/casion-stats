@@ -258,4 +258,15 @@ class Result extends Model
 
         return $issues;
     }
+    /**
+     * Get the athlete's age at the time of the performance.
+     */
+    public function getAthleteAgeAttribute()
+    {
+        if (!$this->athlete || !$this->event || $this->athlete->birthdate->year <= 1900) {
+            return null;
+        }
+
+        return $this->event->date->year - $this->athlete->birthdate->year;
+    }
 }
