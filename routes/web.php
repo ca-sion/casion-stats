@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AthleteController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\ImportHistoricalData;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'show']);
-Route::get('/athletes/{athlete}', [App\Http\Controllers\AthleteController::class, 'show'])->name('athletes.show');
+Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('athletes.show');
+Route::get('/import-historical', ImportHistoricalData::class)->name('import.historical');
