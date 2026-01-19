@@ -17,7 +17,7 @@
         <div class="bg-gray-50 dark:bg-gray-900 selection:bg-red-500 selection:text-white">
 
             <div class="py-4">
-                <h1 class="text-3xl font-bold text-center">CA Sion - Statistiques (➝ 2014)</h1>
+                <h1 class="text-3xl font-bold text-center">CA Sion - Statistiques (➝ 2016)</h1>
             </div>
 
             <div class="max-w-7xl mx-auto p-6 lg:p-8">
