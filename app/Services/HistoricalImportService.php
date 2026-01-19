@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class HistoricalImportService
 {
+    use \App\Support\PerformanceNormalizer;
+
     private array $disciplineMapping = [];
     private array $categoryMapping = [];
 
@@ -307,8 +309,37 @@ class HistoricalImportService
             'event_id' => $event->id,
             'athlete_category_id' => $category->id,
             'performance' => $data['performance'],
+            'performance_normalized' => $this->parsePerformanceToSeconds($data['performance']),
             'wind' => $data['wind'],
-            'rank' => $data['rank'],
+            // 'rank' => $data['rank'], // User requested to ignore rank as it's likely "Best List" rank
         ]);
+    }
+    public function checkResultExists(array $data, Athlete $athlete, Discipline $discipline, AthleteCategory $category): bool
+    {
+        // 1. Precise check (Same Everything)
+        $date = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
+        
+        // Normalize performance for comparison (handles "5.4" vs "5.40")
+        $normalizedPerf = $this->parsePerformanceToSeconds($data['performance']);
+
+        // 2. Loose check: Check for ANY result for this athlete + discipline + date + normalized performance
+        $query = Result::where('athlete_id', $athlete->id)
+                          ->where('discipline_id', $discipline->id)
+                          ->whereHas('event', function($query) use ($date) {
+                              $query->whereDate('date', $date);
+                          });
+
+        if ($normalizedPerf !== null) {
+            // Robust check using float comparison OR specific string match (for legacy data)
+            $query->where(function($q) use ($normalizedPerf, $data) {
+                $q->where('performance_normalized', $normalizedPerf)
+                  ->orWhere('performance', $data['performance']);
+            });
+        } else {
+            // Fallback to strict string check if normalization fails
+            $query->where('performance', $data['performance']);
+        }
+
+        return $query->exists();
     }
 }

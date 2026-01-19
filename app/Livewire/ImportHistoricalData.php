@@ -133,22 +133,45 @@ class ImportHistoricalData extends Component
         // Pre-calculate status for all rows
         $this->resolvedAthletes = [];
         
-        // Temporary cache to avoid re-querying same athlete in loop
-        $athleteCache = []; 
-        
         foreach ($this->parsedData as $index => $row) {
-             // We need to apply the mappings chosen in Step 2 to the row first
-             // But parseCsv returned raw strings.
-             // We can resolve the mapping now.
+             // 1. Resolve Athlete (Dry Run)
+             [$athlete, $isNewAthlete] = $this->service->resolveAthlete($row, true);
              
-             // Use dryRun=true to avoid creating athletes in DB during preview
-             [$athlete, $isNew] = $this->service->resolveAthlete($row, true);
+             // 2. Resolve Discipline
+             $dNameRaw = $row['raw_discipline'];
+             $dNameMapped = $this->disciplineMappings[$dNameRaw] ?? null;
+             $discipline = null;
+             if ($dNameMapped) {
+                  $discipline = Discipline::where('name_fr', $dNameMapped)->first();
+             } else {
+                  $discipline = $this->service->findOrMapDiscipline($dNameRaw);
+             }
+
+             // 3. Resolve Category
+             $cNameRaw = $row['raw_category'];
+             $cNameMapped = $this->categoryMappings[$cNameRaw] ?? null;
+             $category = null;
+             if ($cNameMapped) {
+                  $category = AthleteCategory::where('name', $cNameMapped)->first();
+             } else {
+                  $category = $this->service->findOrMapCategory($cNameRaw);
+             }
              
+             // 4. Check Result Status
+             $resultStatus = 'error'; // default
+             if ($athlete && $discipline && $category) {
+                 $exists = $this->service->checkResultExists($row, $athlete, $discipline, $category);
+                 $resultStatus = $exists ? 'duplicate' : 'new';
+             }
+
              $this->resolvedAthletes[$index] = [
                  'row' => $row,
-                 'status' => $isNew ? 'new' : 'found',
+                 'athlete_status' => $isNewAthlete ? 'new' : 'found',
                  'athlete' => $athlete,
-                 'is_selected' => true // Default to import
+                 'result_status' => $resultStatus,
+                 'discipline' => $discipline,
+                 'category' => $category,
+                 'is_selected' => ($resultStatus === 'new'), // Default select only new results
              ];
         }
     }
