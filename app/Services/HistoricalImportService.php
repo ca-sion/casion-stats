@@ -117,130 +117,41 @@ class HistoricalImportService
 
     public function findOrMapDiscipline(string $germanName): ?Discipline
     {
-        // 1. Try exact match on name_de field
+        // 1. Try exact match on name_de (Optimized: Checking both columns or just de)
+        // Since we migrated mappings to name_de, we check that first.
         $discipline = Discipline::where('name_de', $germanName)->first();
         if ($discipline) return $discipline;
+        
+        // 2. Try exact match on name_fr (Legacy/Fallback)
+        $discipline = Discipline::where('name_fr', $germanName)->first();
+        if ($discipline) return $discipline;
 
-        // 2. Try automated basic mapping (hardcoded fallback)
-        $map = [
-            '50m' => '50 m',
-            '60m' => '60 m',
-            '80m' => '80 m',
-            '100m' => '100 m',
-            '150m' => '150 m',
-            '200m' => '200 m',
-            '300m' => '300 m',
-            '400m' => '400 m',
-            '600m' => '600 m',
-            '800m' => '800 m',
-            '1000m' => '1000 m',
-            '1500m' => '1500 m',
-            '2000m' => '2000 m',
-            '3000m' => '3000 m',
-            '5000m' => '5000 m',
-
-            // Hurdles
-            '100m Hürden 838mm' => '100 m haies 84.0',
-            '110m Hürden 1067mm' => '110 m haies 106.7',
-            '110m Hürden 991mm' => '110 m haies 99.1',
-            '110m Hürden 914mm' => '110 m haies 91.4',
-            '400m Hürden 914mm' => '400 m haies 91.4',
-            '400m Hürden 762mm' => '400 m haies 76.2',
-            '80m Hürden 762mm' => '80 m haies 76.2',
-            '60m Hürden 762mm' => '60 m haies 76.2',
-
-            // Jumps
-            'Hochsprung' => 'Hauteur',
-            'Stabhochsprung' => 'Perche',
-            'Weitsprung' => 'Longueur',
-            'Weitsprung Zone' => 'Longueur (zone)',
-            'Dreisprung' => 'Triple',
-
-            // Throws
-            'Kugelstoß 7260g' => 'Poids 7.26 kg',
-            'Kugelstoß 6000g' => 'Poids 6.00 kg',
-            'Kugelstoß 5000g' => 'Poids 5.00 kg',
-            'Kugelstoß 4000g' => 'Poids 4.00 kg',
-            'Kugelstoß 3000g' => 'Poids 3.00 kg',
-            'Kugelstoß 2500g' => 'Poids 2.50 kg',
-
-            'Diskuswurf 2000g' => 'Disque 2.00 kg',
-            'Diskuswurf 1750g' => 'Disque 1.75 kg',
-            'Diskuswurf 1500g' => 'Disque 1.50 kg',
-            'Diskuswurf 1000g' => 'Disque 1.00 kg',
-            'Diskuswurf 750g' => 'Disque 0.75 kg',
-
-            'Speerwurf 800g' => 'Javelot 800 gr',
-            'Speerwurf 700g' => 'Javelot 700 gr',
-            'Speerwurf 600g' => 'Javelot 600 gr',
-            'Speerwurf 500g' => 'Javelot 500 gr',
-            'Speerwurf 400g' => 'Javelot 400 gr',
-
-            'Ballwurf 200g' => 'Balle 200 gr',
-            'Ballwurf 80g' => 'Balle 80 gr',
-
-            // Multi
-            'Fünfkampf' => 'Pentathlon', // Check if "Pentathlon" is unique enough or needs context
-            'Sechskampf' => 'Hexathlon',
-            'Siebenkampf' => 'Heptathlon',
-            'Zehnkampf' => 'Décathlon',
-            'UBS Kids Cup' => 'UBS Kids Cup',
-        ];
-
-        if (isset($map[$germanName])) {
-             return Discipline::where('name_fr', $map[$germanName])->first();
-        }
-
-        return null; // Needed UI intervention
+        // 3. Last resort: Create new discipline with the raw name
+        return Discipline::create([
+            'name_de' => $germanName,
+            'name_fr' => $germanName, // Set as raw name for now
+            'type' => 'individual', // Default
+        ]);
     }
 
     public function findOrMapCategory(string $germanName): ?AthleteCategory
     {
+        // 1. Check exact name_de
         $category = AthleteCategory::where('name_de', $germanName)->first();
         if ($category) return $category;
+        
+        // 2. Check exact name (Legacy/Fallback)
+        $category = AthleteCategory::where('name', $germanName)->first();
+        if ($category) return $category;
 
-        // Fallback mapping logic
-        $map = [
-            'Männer' => 'MAN',
-            'Frauen' => 'WOM',
-            'U23 Männer' => 'U23 M',
-            'U23 Frauen' => 'U23 W',
-            'U20 Männer' => 'U20 M',
-            'U20 Frauen' => 'U20 W',
-            'U18 Männer' => 'U18 M',
-            'U18 Frauen' => 'U18 W',
-            'U16 Männer' => 'U16 M',
-            'U16 Frauen' => 'U16 W',
-            'U14 Männer' => 'U14 M',
-            'U14 Frauen' => 'U14 W',
-            'U12 Männer' => 'U12 M',
-            'U12 Frauen' => 'U12 W',
-            'U10 Männer' => 'U10 M',
-            'U10 Frauen' => 'U10 W',
-            
-            // Single ages (M 15 -> U16 M, etc)
-            'M 15' => 'U16 M', 'M 14' => 'U16 M',
-            'W 15' => 'U16 W', 'W 14' => 'U16 W',
-            'M 13' => 'U14 M', 'M 12' => 'U14 M',
-            'W 13' => 'U14 W', 'W 12' => 'U14 W',
-            'M 11' => 'U12 M', 'M 10' => 'U12 M',
-            'W 11' => 'U12 W', 'W 10' => 'U12 W',
-            'M 9' => 'U10 M', 'M 8' => 'U10 M',
-             'W 9' => 'U10 W', 'W 8' => 'U10 W',
-
-            'Masters männlich' => 'MASTERS M',
-            'Masters weiblich' => 'MASTERS W',
-            'Männer M30' => 'MASTERS M',
-        ];
-
-        if (isset($map[$germanName])) {
-            return AthleteCategory::where('name', $map[$germanName])->first();
-        }
-
-        return null;
+        // 3. Last resort: Create new category
+        return AthleteCategory::create([
+            'name' => $germanName,
+            'name_de' => $germanName,
+        ]);
     }
 
-    public function resolveAthlete(array $data): array // Returns [Athlete, bool isNew]
+    public function resolveAthlete(array $data, bool $dryRun = false): array // Returns [Athlete, bool isNew]
     {
         // 1. Try by License
         if (!empty($data['license'])) {
@@ -255,32 +166,83 @@ class HistoricalImportService
         $query = Athlete::where('first_name', $data['firstname'])
                         ->where('last_name', $data['lastname']);
         
-        // Check if we have exact birthdate match
         $candidates = $query->get();
+        $nullBirthdateCandidate = null;
+        $nullBirthdateCount = 0;
+
         foreach ($candidates as $candidate) {
-            // Compare years
-            $candidateYear = Carbon::parse($candidate->birthdate)->year;
-            $importYear = Carbon::parse($data['birthdate'])->year;
+            if (!$candidate->birthdate) {
+                $nullBirthdateCandidate = $candidate;
+                $nullBirthdateCount++;
+                continue;
+            }
+
+            // Compare years if date exists
+            $candidateDate = Carbon::parse($candidate->birthdate);
+            $candidateYear = $candidateDate->year;
+            $candidateMonth = $candidateDate->month;
+            $candidateDay = $candidateDate->day;
+
+            $importDate = Carbon::parse($data['birthdate']);
+            $importYear = $importDate->year;
+            $importMonth = $importDate->month;
+            $importDay = $importDate->day;
             
             if ($candidateYear === $importYear) {
                 // Match found! 
+                
+                // DATA ENRICHMENT: Update birthdate if import has more specific data
+                // If candidate only has YYYY-01-01 and import has real month/day
+                if ($candidateMonth === 1 && $candidateDay === 1 && ($importMonth !== 1 || $importDay !== 1)) {
+                    $candidate->birthdate = $data['birthdate'];
+                }
+
                 // Update license if missing
                 if (!$candidate->license && !empty($data['license'])) {
                     $candidate->license = $data['license'];
+                }
+
+                if ($candidate->isDirty() && !$dryRun) {
                     $candidate->save();
                 }
+
                 return [$candidate, false];
             }
         }
 
+        // 3. Fallback: If no year match, but we have exactly ONE candidate with NULL birthdate
+        if ($nullBirthdateCount === 1) {
+            if (!$dryRun) {
+                $nullBirthdateCandidate->birthdate = $data['birthdate'];
+                if (!$nullBirthdateCandidate->license && !empty($data['license'])) {
+                    $nullBirthdateCandidate->license = $data['license'];
+                }
+                $nullBirthdateCandidate->save();
+            }
+            return [$nullBirthdateCandidate, false];
+        }
+
         // 3. Create New
+        if ($dryRun) {
+            // Return unsaved instance for simple logic
+            // Note: Relations won't work on unsaved instances if we rely on IDs later, 
+            // but for UI display it's usually fine.
+            $athlete = new Athlete([
+                'first_name' => $data['firstname'],
+                'last_name' => $data['lastname'],
+                'birthdate' => $data['birthdate'],
+                'license' => $data['license'],
+                'genre' => $this->inferGenre($data['raw_category'] ?? ''),
+            ]);
+            return [$athlete, true];
+        }
+
         $athlete = Athlete::create([
             'first_name' => $data['firstname'],
             'last_name' => $data['lastname'],
             'birthdate' => $data['birthdate'],
             'license' => $data['license'],
-            'genre' => 'm', // TODO: Infer genre from category? (Männer vs Frauen)
-                            // This is missing in the simple logic. checking category name (M vs W) is needed.
+            'genre' => $this->inferGenre($data['raw_category'] ?? ''),
         ]);
         
         return [$athlete, true];
@@ -312,24 +274,26 @@ class HistoricalImportService
         // Date format convert: 05.10.2025 -> 2025-10-05
         $date = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
         
-        $event = Event::firstOrCreate(
-            [
+        // Resolve Event using whereDate to handle SQLite format inconsistencies
+        $event = Event::where('name', $data['event_name'])
+                      ->whereDate('date', $date)
+                      ->where('location', $data['location'])
+                      ->first();
+
+        if (!$event) {
+            $event = Event::create([
                 'name' => $data['event_name'],
                 'date' => $date,
                 'location' => $data['location'],
-            ],
-            [
-                // link, category_id etc could be null
-            ]
-        );
+            ]);
+        }
 
-        // Check for existing result
-        // TODO: We need to check if result already exists to avoid duplicates
-        // We'll trust the caller to check permissions, but here we do the check.
+        // Check for existing result to avoid duplicates
         
         $existing = Result::where('athlete_id', $athlete->id)
                           ->where('discipline_id', $discipline->id)
                           ->where('event_id', $event->id)
+                          ->where('athlete_category_id', $category->id)
                           ->where('performance', $data['performance'])
                           ->first();
 

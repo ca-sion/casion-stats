@@ -141,7 +141,8 @@ class ImportHistoricalData extends Component
              // But parseCsv returned raw strings.
              // We can resolve the mapping now.
              
-             [$athlete, $isNew] = $this->service->resolveAthlete($row);
+             // Use dryRun=true to avoid creating athletes in DB during preview
+             [$athlete, $isNew] = $this->service->resolveAthlete($row, true);
              
              $this->resolvedAthletes[$index] = [
                  'row' => $row,
@@ -161,16 +162,9 @@ class ImportHistoricalData extends Component
             if (!$item['is_selected']) continue;
             
             $row = $item['row'];
-            $athlete = $item['athlete']; // This might be a transient model if new? 
-            // Wait, resolveAthlete created the model if new?
-            // Service->resolveAthlete: "$athlete = Athlete::create(...)". Yes it persists immediately.
-            // This might be risky if user cancels step 3.
-            // For a robust wizard, we should probably simulate in step 3 and persist in step 4.
-            // But for this V1, let's assume it's OK or user deletes.
-            // Actually, `resolveAthlete` in my Service implementation DOES create the athlete.
-            // "3. Create New ... Athlete::create".
-            // Implementation detail: Maybe we should separate 'resolution' (finding) and 'creation'.
-            // But keeping it simple as per plan.
+            
+            // Re-resolve athlete with dryRun=false to verify/persist
+            [$athlete, $isNew] = $this->service->resolveAthlete($row, false);
             
             // Map Discipline
             $dNameRaw = $row['raw_discipline'];
