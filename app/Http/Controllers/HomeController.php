@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Result;
-use Illuminate\View\View;
-use App\Models\Discipline;
-use Illuminate\Http\Request;
 use App\Models\AthleteCategory;
+use App\Models\Discipline;
+use App\Models\Result;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {

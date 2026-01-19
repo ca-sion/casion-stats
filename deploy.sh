@@ -60,8 +60,8 @@ php artisan view:cache
 # Install node modules
 # npm install
 
-# Build assets using Laravel Mix
-# npm run production
+# Build assets using Vite
+npm run build
 
 # Start Cronless schedule
 # php artisan schedule:run-cronless
