@@ -184,7 +184,7 @@ class StatsTable extends Component
             'isFix' => $this->fix,
             'canFix' => app()->isLocal(),
             'errorCount' => $errorCount,
-            'disciplines' => \App\Models\Discipline::orderBy('name')->get(),
+            'disciplines' => \App\Models\Discipline::orderBy('name')->get()->values(),
             'athleteCategories' => \App\Models\AthleteCategory::orderBy('order')->get(),
             'fixSummary' => $fixSummary,
         ]);

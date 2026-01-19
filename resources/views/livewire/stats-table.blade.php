@@ -9,25 +9,54 @@
                 get filteredDisciplines() {
                     if (this.search === '') return this.disciplines;
                     const s = this.search.toLowerCase();
-                    return this.disciplines.filter(d => d.name.toLowerCase().includes(s));
+                    return this.disciplines.filter(d => (d.name || '').toLowerCase().includes(s));
                 },
                 select(id) {
                     $wire.set('disciplineId', id);
                     this.open = false;
                     this.search = '';
                 }
-            }" class="dropdown w-full" :class="open && 'dropdown-open'" @click.outside="open = false">
-                <div tabindex="0" role="button" class="select select-bordered w-full flex items-center justify-between" @click="open = !open">
-                    <span>{{ $disciplines->firstWhere('id', $disciplineId)?->name ?? 'Discipline' }}</span>
-                </div>
-                <div class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-1 border border-base-300">
-                    <input type="text" x-model="search" placeholder="Rechercher..." class="input input-sm input-bordered mb-2 w-full" autofocus @click.stop x-ref="searchInput" x-effect="if(open) $nextTick(() => $refs.searchInput.focus())">
-                    <ul class="max-h-60 overflow-y-auto flex flex-col gap-1">
+            }" 
+            class="relative w-full" 
+            @click.outside="open = false"
+            @keydown.escape.window="open = false">
+                <button type="button" 
+                        class="select select-bordered w-full flex items-center justify-between bg-base-100" 
+                        @click="open = !open">
+                    <span class="truncate">{{ $disciplines->firstWhere('id', $disciplineId)?->name ?? 'Discipline' }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 opacity-40 transition-transform duration-200" :class="open && 'rotate-180'">
+                        <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <div class="absolute z-[100] menu p-2 shadow-2xl bg-base-100 rounded-box w-full mt-1 border border-base-300 block" 
+                     x-show="open" 
+                     x-cloak
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95">
+                    <div class="px-2 pt-1 pb-2">
+                        <input type="text" 
+                               x-model="search" 
+                               x-ref="searchInput"
+                               placeholder="Rechercher..." 
+                               class="input input-sm input-bordered w-full focus:outline-primary" 
+                               @click.stop 
+                               @keydown.enter.prevent="if(filteredDisciplines.length > 0) select(filteredDisciplines[0].id)"
+                               x-effect="if(open) $nextTick(() => $refs.searchInput.focus())">
+                    </div>
+                    <ul class="max-h-64 overflow-y-auto flex flex-col gap-1 px-1">
                         <template x-for="discipline in filteredDisciplines" :key="discipline.id">
                             <li>
-                                <a @click="select(discipline.id)" :class="discipline.id == {{ $disciplineId }} && 'menu-active'">
+                                <button type="button" 
+                                        @click="select(discipline.id)" 
+                                        :class="discipline.id == @js($disciplineId) ? 'bg-primary text-primary-content hover:bg-primary-focus' : 'hover:bg-base-200'" 
+                                        class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 text-sm">
                                     <span x-text="discipline.name"></span>
-                                </a>
+                                </button>
                             </li>
                         </template>
                         <li x-show="filteredDisciplines.length === 0" class="p-2 text-center text-sm opacity-50">Aucun résultat</li>
