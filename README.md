@@ -7,6 +7,7 @@ Ce projet est une application web de gestion et de consultation des statistiques
 Ce module a été créé le **12 décembre 2014 par Michael Ravedoni**. Il repose sur une architecture de données alimentée et consolidée par plusieurs contributeurs au fil des ans :
 
 - **Période 1997 - 2012** : Base de données initialement alimentée par **René de Voogd**.
+- **Période 2000 - 2025** : Base de données alimentée par Swiss Athletics depuis LaNet.
 - **Archives 1962 - 2010** : Reprise d'anciennes bases de résultats. Notez que ces données historiques peuvent contenir des approximations ou des erreurs (résultats, disciplines, noms ou dates).
 - **État des lieux actuel** : Les résultats sont globalement complets jusqu'en **juin 2017**.
 
