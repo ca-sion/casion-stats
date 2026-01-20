@@ -103,7 +103,33 @@ class DisciplineDeduplicationService
      */
     public function mergeDisciplines(Discipline $target, array $sourceIds): void
     {
-        DB::transaction(function () use ($target, $sourceIds) {
+        $sources = Discipline::whereIn('id', $sourceIds)->get();
+
+        DB::transaction(function () use ($target, $sources, $sourceIds) {
+            // Smart Merge: Fill non-null fields in target from sources
+            $fields = [
+                'name_de', 'name_en', 'code', 'wa_code', 
+                'seltec_code', 'seltec_id', 'alabus_id', 
+                'has_wind', 'type', 'is_relay', 'order'
+            ];
+
+            $updates = [];
+            foreach ($fields as $field) {
+                if (empty($target->$field)) {
+                    foreach ($sources as $source) {
+                        if (!empty($source->$field)) {
+                            $updates[$field] = $source->$field;
+                            $target->$field = $source->$field; // Update local instance for subsequent fields or logic
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($updates)) {
+                $target->update($updates);
+            }
+
             // Reassign results
             Result::whereIn('discipline_id', $sourceIds)
                 ->update(['discipline_id' => $target->id]);

@@ -6,7 +6,7 @@
     </div>
 
     <!-- Sticky Toolbar -->
-    <div class="sticky top-4 z-20 max-w-7xl mx-auto mb-8">
+    <div class="sticky top-20 z-50 max-w-7xl mx-auto mb-8 transition-all duration-300">
         <div class="bg-white/80 backdrop-blur-md border border-slate-200 shadow-lg rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div class="relative w-full md:w-96">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
