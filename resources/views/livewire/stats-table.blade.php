@@ -199,10 +199,28 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
+                        @php
+                            $displayRank = 0;
+                            $realCount = 0;
+                            $prevPerformance = null;
+                            $lastDisplayedRank = null;
+                        @endphp
                         @forelse ($results as $result)
+                            @php
+                                $realCount++;
+                                if ($result->performance !== $prevPerformance) {
+                                    $displayRank = $realCount;
+                                }
+                                $prevPerformance = $result->performance;
+                            @endphp
                         <tr wire:key="{{ $result->id }}" class="group hover:bg-slate-50/60 transition-all duration-150 {{ $isFix && !empty($result->diagnostics) ? 'bg-amber-50/20' : '' }}">
                             <td class="pl-4 py-2.5">
-                                <span class="text-[10px] font-bold text-slate-300 group-hover:text-primary transition-colors">{{ $loop->iteration }}</span>
+                                <span class="text-[10px] font-bold text-slate-300 group-hover:text-primary transition-colors">
+                                    @if($displayRank !== $lastDisplayedRank)
+                                        {{ $displayRank }}
+                                        @php $lastDisplayedRank = $displayRank; @endphp
+                                    @endif
+                                </span>
                             </td>
                             <td class="py-2.5">
                                 <div class="flex flex-col">
