@@ -137,12 +137,14 @@ class StatsTable extends Component
             ->forGenre($this->genre)
             ->orderedByPerformance($discipline->sorting ?? 'asc');
 
-        $limit = $this->fix ? 500 : 100;
-        $results = $query->limit($limit)->get();
+        // On récupère les résultats sans limite SQL trop restrictive pour garantir un vrai Top 100 
+        // après le filtre unique('athlete_id') en PHP.
+        // On limite à 5000 pour éviter des problèmes de mémoire si la base est énorme.
+        $results = $query->limit(5000)->get();
 
-        // If not in fix mode, we only want the best result per athlete
+        // If not in fix mode, we only want the best result per athlete (vraie limite Top 100)
         if (!$this->fix) {
-            $results = $results->unique('athlete_id');
+            $results = $results->unique('athlete_id')->take(100);
         }
 
         return $results;
