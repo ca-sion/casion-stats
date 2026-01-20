@@ -21,3 +21,4 @@ Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('ath
 Route::get('/import-historical', ImportHistoricalData::class)->name('import.historical');
 Route::get('/deduplicate-athletes', \App\Livewire\DeduplicateAthletes::class)->name('athletes.deduplicate');
 Route::get('/deduplicate-events', \App\Livewire\DeduplicateEvents::class)->name('events.deduplicate');
+Route::get('/deduplicate-disciplines', \App\Livewire\DeduplicateDisciplines::class)->name('disciplines.deduplicate');
