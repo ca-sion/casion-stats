@@ -16,11 +16,13 @@ class ImportHistoricalData extends Component
     public $step = 1;
     
     // Step 2: Mapping
-    public $unmappedDisciplines = []; // ['german_name' => 'french_name_fr_db']
+    public $unmappedDisciplines = []; // ['german_name' => '']
     public $disciplineMappings = []; // User choices: ['german_name' => 'selected_fr_name']
+    public $autoMappedDisciplines = []; // ['german_name' => 'fr_name']
     
     public $unmappedCategories = [];
     public $categoryMappings = [];
+    public $autoMappedCategories = [];
     
     // Step 3: Resolution
     public $parsedData = [];
@@ -65,15 +67,23 @@ class ImportHistoricalData extends Component
         $categories = collect($data)->pluck('raw_category')->unique();
         
         $this->unmappedDisciplines = [];
+        $this->autoMappedDisciplines = [];
         foreach ($disciplines as $german) {
-            if (!$this->service->findOrMapDiscipline($german)) {
+            $model = $this->service->findDisciplineModel($german);
+            if ($model) {
+                $this->autoMappedDisciplines[$german] = $model->name_fr;
+            } else {
                 $this->unmappedDisciplines[$german] = ''; // Init empty selection
             }
         }
         
         $this->unmappedCategories = [];
+        $this->autoMappedCategories = [];
         foreach ($categories as $german) {
-            if (!$this->service->findOrMapCategory($german)) {
+            $model = $this->service->findCategoryModel($german);
+            if ($model) {
+                $this->autoMappedCategories[$german] = $model->name;
+            } else {
                 $this->unmappedCategories[$german] = '';
             }
         }

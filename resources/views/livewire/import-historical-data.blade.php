@@ -111,10 +111,41 @@
                 </div>
             @endif
 
+            @if(count($autoMappedDisciplines) > 0 || count($autoMappedCategories) > 0)
+                <div class="collapse collapse-arrow bg-base-200 border border-base-300 shadow-sm">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-sm font-medium flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-success">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Correspondances automatiques trouvées ({{ count($autoMappedDisciplines) + count($autoMappedCategories) }})
+                    </div>
+                    <div class="collapse-content"> 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-xs">
+                            @foreach($autoMappedDisciplines as $german => $french)
+                                <div class="flex justify-between border-b border-base-300 py-1">
+                                    <span class="text-base-content/60 font-mono">{{ $german }}</span>
+                                    <span class="font-bold text-success">{{ $french }} (Discipline)</span>
+                                </div>
+                            @endforeach
+                            @foreach($autoMappedCategories as $german => $french)
+                                <div class="flex justify-between border-b border-base-300 py-1">
+                                    <span class="text-base-content/60 font-mono">{{ $german }}</span>
+                                    <span class="font-bold text-success">{{ $french }} (Catégorie)</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if(count($unmappedDisciplines) === 0 && count($unmappedCategories) === 0)
-                <div class="alert alert-success">
+                <div class="alert alert-success shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>Tout semble mappé correctement ! Vous pouvez continuer.</span>
+                    <div>
+                        <h3 class="font-bold">Tout est prêt !</h3>
+                        <div class="text-xs">Toutes les disciplines et catégories du fichier ont été reconnues automatiquement.</div>
+                    </div>
                 </div>
             @endif
 

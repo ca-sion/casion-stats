@@ -117,16 +117,21 @@ class HistoricalImportService
         return null;
     }
 
-    public function findOrMapDiscipline(string $germanName): ?Discipline
+    public function findDisciplineModel(string $germanName): ?Discipline
     {
-        // 1. Try exact match on name_de (Optimized: Checking both columns or just de)
-        // Since we migrated mappings to name_de, we check that first.
+        // 1. Try exact match on name_de
         $discipline = Discipline::where('name_de', $germanName)->first();
         if ($discipline) return $discipline;
         
         // 2. Try exact match on name_fr (Legacy/Fallback)
-        $discipline = Discipline::where('name_fr', $germanName)->first();
-        if ($discipline) return $discipline;
+        return Discipline::where('name_fr', $germanName)->first();
+    }
+
+    public function findOrMapDiscipline(string $germanName): ?Discipline
+    {
+        if ($discipline = $this->findDisciplineModel($germanName)) {
+            return $discipline;
+        }
 
         // 3. Last resort: Create new discipline with the raw name
         return Discipline::create([
@@ -136,15 +141,21 @@ class HistoricalImportService
         ]);
     }
 
-    public function findOrMapCategory(string $germanName): ?AthleteCategory
+    public function findCategoryModel(string $germanName): ?AthleteCategory
     {
         // 1. Check exact name_de
         $category = AthleteCategory::where('name_de', $germanName)->first();
         if ($category) return $category;
         
         // 2. Check exact name (Legacy/Fallback)
-        $category = AthleteCategory::where('name', $germanName)->first();
-        if ($category) return $category;
+        return AthleteCategory::where('name', $germanName)->first();
+    }
+
+    public function findOrMapCategory(string $germanName): ?AthleteCategory
+    {
+        if ($category = $this->findCategoryModel($germanName)) {
+            return $category;
+        }
 
         // 3. Last resort: Create new category
         return AthleteCategory::create([
