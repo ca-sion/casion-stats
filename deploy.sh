@@ -39,20 +39,20 @@ php artisan migrate --force
 # php artisan migrate:fresh --seed --force
 
 # Clear caches
-echo 'Command: cache'
-php artisan cache:clear
+# echo 'Command: cache'
+# php artisan cache:clear
 
 # Laravel clear expired password reset tokens
 # php artisan auth:clear-resets
 
 # Laravel clear and cache routes
-php artisan route:cache
+# php artisan route:cache
 
 # Laravel clear and cache config
-php artisan config:cache
+# php artisan config:cache
 
 # Laravel clear and cache views
-php artisan view:cache
+# php artisan view:cache
 
 # Laravel clear and cache events
 # php artisan event:cache
@@ -61,7 +61,7 @@ php artisan view:cache
 # npm install
 
 # Build assets using Vite
-npm run build
+# npm run build
 
 # Start Cronless schedule
 # php artisan schedule:run-cronless
