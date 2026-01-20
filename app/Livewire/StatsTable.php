@@ -137,7 +137,8 @@ class StatsTable extends Component
             ->forGenre($this->genre)
             ->orderedByPerformance($discipline->sorting ?? 'asc');
 
-        $results = $query->get();
+        $limit = $this->fix ? 500 : 100;
+        $results = $query->limit($limit)->get();
 
         // If not in fix mode, we only want the best result per athlete
         if (!$this->fix) {

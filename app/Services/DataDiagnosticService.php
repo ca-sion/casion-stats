@@ -148,10 +148,10 @@ class DataDiagnosticService
             }
         }
 
-        // 3. Potential duplicate
+        // 3. Potential duplicate (only flag if a version with a LOWER ID exists)
         $duplicate = Result::where('athlete_id', $result->athlete_id)
             ->where('discipline_id', $result->discipline_id)
-            ->where('id', '!=', $result->id)
+            ->where('id', '<', $result->id)
             ->whereHas('event', function ($query) use ($result) {
                 $query->where('date', $result->event->date);
             })
@@ -160,7 +160,7 @@ class DataDiagnosticService
         if ($duplicate) {
             $issues[] = [
                 'type' => 'duplicate',
-                'label' => "Doublon potentiel (même jour)",
+                'label' => "Doublon (ID {$result->id} > original)",
                 'severity' => 'info',
                 'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
             ];

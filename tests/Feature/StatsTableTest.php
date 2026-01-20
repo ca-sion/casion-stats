@@ -124,4 +124,65 @@ class StatsTableTest extends TestCase
                 return $results->count() === 1;
             });
     }
+
+    /**
+     * Test the results are limited to 100.
+     */
+    public function test_results_are_limited_to_100(): void
+    {
+        $discipline = Discipline::factory()->create();
+        $category = AthleteCategory::factory()->create();
+        $event = Event::factory()->create();
+        
+        // Create 110 results
+        Result::factory()->count(110)->create([
+            'discipline_id' => $discipline->id,
+            'athlete_category_id' => $category->id,
+            'event_id' => $event->id,
+        ]);
+
+        Livewire::test(\App\Livewire\StatsTable::class, ['disciplineId' => $discipline->id])
+            ->assertViewHas('results', function ($results) {
+                return $results->count() === 100;
+            });
+    }
+
+    /**
+     * Test that bulk fix only deletes one of the duplicates and preserves one.
+     */
+    public function test_bulk_fix_only_deletes_one_duplicate(): void
+    {
+        $discipline = Discipline::factory()->create();
+        $category = AthleteCategory::factory()->create();
+        $event = Event::factory()->create();
+        $athlete = \App\Models\Athlete::factory()->create(['genre' => $category->genre]);
+        
+        // Create 2 identical results
+        $res1 = Result::create([
+            'athlete_id' => $athlete->id,
+            'discipline_id' => $discipline->id,
+            'athlete_category_id' => $category->id,
+            'event_id' => $event->id,
+            'performance' => '10.00',
+            'performance_normalized' => 10.00,
+        ]);
+
+        $res2 = Result::create([
+            'athlete_id' => $athlete->id,
+            'discipline_id' => $discipline->id,
+            'athlete_category_id' => $category->id,
+            'event_id' => $event->id,
+            'performance' => '10.00',
+            'performance_normalized' => 10.00,
+        ]);
+
+        $this->assertEquals(2, Result::count());
+
+        Livewire::test(\App\Livewire\StatsTable::class, ['disciplineId' => $discipline->id])
+            ->set('fix', true) // Enable fix mode to see all results
+            ->call('bulkFix');
+
+        $this->assertEquals(1, Result::count());
+        $this->assertEquals($res1->id, Result::first()->id, "The record with the lowest ID should be preserved.");
+    }
 }
