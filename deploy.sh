@@ -7,8 +7,7 @@ php artisan down --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
 # Pull the latest changes from the git repository
 # git reset --hard
 # git clean -df
-rm database/database.sqlite
-git pull
+# git pull
 
 # Install/update composer dependecies
 echo 'Command: composer'
