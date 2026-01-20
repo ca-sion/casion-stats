@@ -25,8 +25,7 @@ class ImportHistoricalData extends Component
     public $autoMappedCategories = [];
     
     // Step 3: Resolution
-    public $parsedData = [];
-    public $resolvedAthletes = []; // Array of ['data' => ..., 'status' => 'new'|'found'|'merged', 'athlete' => ...]
+    public $resolvedAthletes = []; // Array of ['data' => ..., 'status' => 'new'|'found'|'merged', 'athlete_id' => ...]
     
     // Progress
     public $importLogs = [];
@@ -60,8 +59,13 @@ class ImportHistoricalData extends Component
         $path = $this->csvFile->getRealPath();
         $data = $this->service->parseCsv($path);
         
-        $this->parsedData = $data;
+        $this->resolveAthletesFromData($data);
         
+        $this->step = 2;
+    }
+
+    private function resolveAthletesFromData($data)
+    {
         // Find unmapped items
         $disciplines = collect($data)->pluck('raw_discipline')->unique();
         $categories = collect($data)->pluck('raw_category')->unique();
@@ -140,10 +144,17 @@ class ImportHistoricalData extends Component
 
     public function resolveAthletes()
     {
+        // We need the data again, so we'll re-parse the file if needed 
+        // OR better: the data was passed during analyzeFile and we don't want to store it in public.
+        // Actually, resolveAthletes is called from saveMappings.
+        // If we don't store parsedData, we must re-parse.
+        $path = $this->csvFile->getRealPath();
+        $data = $this->service->parseCsv($path);
+
         // Pre-calculate status for all rows
         $this->resolvedAthletes = [];
         
-        foreach ($this->parsedData as $index => $row) {
+        foreach ($data as $index => $row) {
              // 1. Resolve Athlete (Dry Run)
              [$athlete, $isNewAthlete] = $this->service->resolveAthlete($row, true);
              
@@ -177,13 +188,20 @@ class ImportHistoricalData extends Component
              $this->resolvedAthletes[$index] = [
                  'row' => $row,
                  'athlete_status' => $isNewAthlete ? 'new' : 'found',
-                 'athlete' => $athlete,
+                 'athlete_id' => $athlete?->id,
+                 'athlete_name' => $athlete ? ($athlete->first_name . ' ' . $athlete->last_name) : '?',
                  'result_status' => $resultStatus,
-                 'discipline' => $discipline,
-                 'category' => $category,
+                 'discipline_id' => $discipline?->id,
+                 'discipline_name' => $discipline?->name_fr,
+                 'category_id' => $category?->id,
+                 'category_name' => $category?->name,
                  'is_selected' => ($resultStatus === 'new'), // Default select only new results
              ];
         }
+
+        // IMPORTANT: Clear parsedData to free memory and reduce payload size
+        // We have everything we need in resolvedAthletes
+        // $this->parsedData = []; // Actually leave it empty in properties if we can
     }
 
     public function executeImport()
@@ -199,31 +217,24 @@ class ImportHistoricalData extends Component
             // Re-resolve athlete with dryRun=false to verify/persist
             [$athlete, $isNew] = $this->service->resolveAthlete($row, false);
             
-            // Map Discipline
-            $dNameRaw = $row['raw_discipline'];
-            // Check manual mapping first
-            $dNameMapped = $this->disciplineMappings[$dNameRaw] ?? null;
-            $discipline = null;
-            if ($dNameMapped) {
-                 $discipline = Discipline::where('name_fr', $dNameMapped)->first();
-            } else {
-                 $discipline = $this->service->findOrMapDiscipline($dNameRaw);
+            // Use IDs from mapping phase if possible to be consistent
+            $discipline = $item['discipline_id'] ? Discipline::find($item['discipline_id']) : null;
+            $category = $item['category_id'] ? AthleteCategory::find($item['category_id']) : null;
+
+            // Fallback to service mapping if IDs weren't resolved (unlikely if analyzed)
+            if (!$discipline) {
+                $dNameRaw = $row['raw_discipline'];
+                $dNameMapped = $this->disciplineMappings[$dNameRaw] ?? null;
+                $discipline = $dNameMapped ? Discipline::where('name_fr', $dNameMapped)->first() : $this->service->findOrMapDiscipline($dNameRaw);
             }
-            
-            // Map Category
-            $cNameRaw = $row['raw_category'];
-            $cNameMapped = $this->categoryMappings[$cNameRaw] ?? null;
-            $category = null;
-            if ($cNameMapped) {
-                 $category = AthleteCategory::where('name', $cNameMapped)->first();
-            } else {
-                 $category = $this->service->findOrMapCategory($cNameRaw);
+
+            if (!$category) {
+                $cNameRaw = $row['raw_category'];
+                $cNameMapped = $this->categoryMappings[$cNameRaw] ?? null;
+                $category = $cNameMapped ? AthleteCategory::where('name', $cNameMapped)->first() : $this->service->findOrMapCategory($cNameRaw);
             }
             
             if ($athlete && $discipline && $category) {
-                // Determine genre from category if we can
-                // My Service had `inferGenre` but used inside resolve.
-                
                 $this->service->importResult($row, $athlete, $discipline, $category);
                 $count++;
             }

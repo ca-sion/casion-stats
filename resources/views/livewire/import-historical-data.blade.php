@@ -210,11 +210,11 @@
                                 </td>
                                 <td>
                                     <div class="flex items-center gap-2">
-                                        <div class="font-bold">{{ $item['athlete']->first_name }} {{ $item['athlete']->last_name }}</div>
+                                        <div class="font-bold">{{ $item['athlete_name'] }}</div>
                                         @if($item['athlete_status'] === 'new')
                                             <span class="badge badge-info badge-xs badge-outline">Nouveau</span>
                                         @else
-                                            <span class="badge badge-success badge-xs badge-outline" title="Existe en BDD #{{ $item['athlete']->id }}">Trouvé</span>
+                                            <span class="badge badge-success badge-xs badge-outline" title="Existe en BDD #{{ $item['athlete_id'] }}">Trouvé</span>
                                         @endif
                                     </div>
                                     <div class="text-xs text-base-content/50">
@@ -225,14 +225,14 @@
                                 <td>
                                     <div class="font-mono font-bold">{{ $item['row']['performance'] }}</div>
                                     <div class="text-xs">
-                                        @if($item['discipline'])
-                                            {{ $item['discipline']->name_fr }}
+                                        @if($item['discipline_name'])
+                                            {{ $item['discipline_name'] }}
                                         @else
                                             <span class="text-error">{{ $item['row']['raw_discipline'] }}</span>
                                         @endif
                                         / 
-                                        @if($item['category'])
-                                            {{ $item['category']->name }}
+                                        @if($item['category_name'])
+                                            {{ $item['category_name'] }}
                                         @else
                                             {{ $item['row']['raw_category'] }}
                                         @endif
