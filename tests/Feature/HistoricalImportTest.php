@@ -170,7 +170,7 @@ class HistoricalImportTest extends TestCase
         // Check Result
         $result = Result::where('athlete_id', $bastien->id)->first();
         $this->assertEquals('6.81', $result->performance);
-        $this->assertEquals(1, $result->rank);
+        // $this->assertEquals(1, $result->rank); // Rank is now ignored during import
         
         // Check Event creation
         $this->assertEquals('Championnats romands en salle', $result->event->name);
@@ -367,5 +367,63 @@ class HistoricalImportTest extends TestCase
         $exists = $this->service->checkResultExists($row, $athlete, $discipline, $category);
         
         $this->assertTrue($exists, 'Should detect duplicate even if Performance string differs (5.4 vs 5.40)');
+    }
+
+    /** @test */
+    public function test_it_can_resolve_events_with_fuzzy_matching()
+    {
+        // 1. Setup existing competition
+        $date = '2024-05-15';
+        $location = 'Geneva';
+        $existingEvent = Event::create([
+            'name' => 'Meeting International de Genève',
+            'date' => $date,
+            'location' => $location
+        ]);
+
+        $athlete = Athlete::factory()->create();
+        $discipline = Discipline::create(['name_de' => '100m', 'name_fr' => '100m', 'type' => 'individual']);
+        $category = AthleteCategory::create(['name' => 'M', 'name_de' => 'Männer']);
+
+        // 2. Import with slightly different name
+        $data = [
+            'event_name' => 'Meeting de Genève', // Similar but not exact
+            'date' => '15.05.2024',
+            'location' => $location,
+            'performance' => '10.50',
+            'wind' => '+0.1',
+        ];
+
+        $result = $this->service->importResult($data, $athlete, $discipline, $category);
+
+        // Assertions: Should use the existing event
+        $this->assertEquals($existingEvent->id, $result->event_id);
+        $this->assertEquals(1, Event::count());
+
+        // 3. Import with SAME name but DIFFERENT location -> Should create NEW event
+        $dataDifferentLocation = [
+            'event_name' => 'Meeting International de Genève',
+            'date' => '15.05.2024',
+            'location' => 'Lausanne', // Different
+            'performance' => '10.60',
+            'wind' => '+0.1',
+        ];
+
+        $result2 = $this->service->importResult($dataDifferentLocation, $athlete, $discipline, $category);
+        $this->assertNotEquals($existingEvent->id, $result2->event_id);
+        $this->assertEquals(2, Event::count());
+
+        // 4. Import with SAME name but DIFFERENT date -> Should create NEW event
+        $dataDifferentDate = [
+            'event_name' => 'Meeting International de Genève',
+            'date' => '16.05.2024', // Different
+            'location' => $location,
+            'performance' => '10.70',
+            'wind' => '+0.1',
+        ];
+
+        $result3 = $this->service->importResult($dataDifferentDate, $athlete, $discipline, $category);
+        $this->assertNotEquals($existingEvent->id, $result3->event_id);
+        $this->assertEquals(3, Event::count());
     }
 }

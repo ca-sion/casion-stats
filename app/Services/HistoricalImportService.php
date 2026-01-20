@@ -270,25 +270,60 @@ class HistoricalImportService
         return 'm'; // Default
     }
 
+    /**
+     * Resolve event by name, date and location.
+     * Uses fuzzy matching for the name if no exact match is found.
+     */
+    private function resolveEvent(string $name, string $date, string $location): Event
+    {
+        // 1. Try exact match first
+        $event = Event::where('name', $name)
+                      ->whereDate('date', $date)
+                      ->where('location', $location)
+                      ->first();
+
+        if ($event) {
+            return $event;
+        }
+
+        // 2. Try fuzzy match on name for the same date and location
+        $candidates = Event::whereDate('date', $date)
+                           ->where('location', $location)
+                           ->get();
+
+        $bestMatch = null;
+        $highestSimilarity = 0;
+
+        foreach ($candidates as $candidate) {
+            // Percent matching using similar_text
+            similar_text(mb_strtolower($name), mb_strtolower($candidate->name), $percent);
+            
+            if ($percent >= 70 && $percent > $highestSimilarity) {
+                $highestSimilarity = $percent;
+                $bestMatch = $candidate;
+            }
+        }
+
+        if ($bestMatch) {
+            Log::info("Fuzzy matched event: '{$name}' matched to '{$bestMatch->name}' ({$highestSimilarity}%)");
+            return $bestMatch;
+        }
+
+        // 3. Create new if no match found
+        return Event::create([
+            'name' => $name,
+            'date' => $date,
+            'location' => $location,
+        ]);
+    }
+
     public function importResult(array $data, Athlete $athlete, Discipline $discipline, AthleteCategory $category): Result
     {
         // Resolve Event
         // Date format convert: 05.10.2025 -> 2025-10-05
         $date = Carbon::createFromFormat('d.m.Y', $data['date'])->format('Y-m-d');
         
-        // Resolve Event using whereDate to handle SQLite format inconsistencies
-        $event = Event::where('name', $data['event_name'])
-                      ->whereDate('date', $date)
-                      ->where('location', $data['location'])
-                      ->first();
-
-        if (!$event) {
-            $event = Event::create([
-                'name' => $data['event_name'],
-                'date' => $date,
-                'location' => $data['location'],
-            ]);
-        }
+        $event = $this->resolveEvent($data['event_name'], $date, $data['location']);
 
         // Check for existing result to avoid duplicates
         
