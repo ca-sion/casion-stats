@@ -1,2 +1,11 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  --color-primary: oklch(50% 0.213 27.518);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(70% 0.04 256.788);
+  --color-secondary-content: oklch(20% 0.042 265.755);
+}
