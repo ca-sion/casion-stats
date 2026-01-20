@@ -9,13 +9,11 @@ Ce module a été créé le **12 décembre 2014 par Michael Ravedoni**. Il repos
 - **Période 1997 - 2012** : Base de données initialement alimentée par **René de Voogd**.
 - **Période 2000 - 2025** : Base de données alimentée par Swiss Athletics depuis LaNet.
 - **Archives 1962 - 2010** : Reprise d'anciennes bases de résultats. Notez que ces données historiques peuvent contenir des approximations ou des erreurs (résultats, disciplines, noms ou dates).
-- **État des lieux actuel** : Les résultats sont globalement complets jusqu'en **juin 2017**.
+- **État des lieux actuel** : Les résultats sont globalement complets jusqu'en **décembre 2025**.
 
 ### ⚠️ Lacunes et Trous de données
 L'analyse de la base de données révèle quelques zones d'ombre importantes :
-- **2013** : Absence totale de résultats (trou de données).
-- **2014** : Seuls quelques résultats partiels (environ 60) sont enregistrés.
-- **2017+** : Les données s'arrêtent après les championnats valaisans de juin 2017. Le vide entre 2017 et aujourd'hui reste à combler.
+- **2021** (indoor) : Absence totale de résultats (trou de données).
 
 > [!TIP]
 > Si vous possédez des archives pour combler ces trous ou si vous constatez une erreur, vos réclamations et annonces sont les bienvenues pour améliorer la précision des statistiques du club !

@@ -127,7 +127,7 @@
         <div class="flex items-center justify-between mb-2 px-1">
             <div class="flex items-center gap-2">
                 <h2 class="text-sm font-bold text-slate-800">Meilleures performances</h2>
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-primary/10 text-primary border border-primary/20"> {{ $fix ? 'DEBUG ('.count($results).')' : 'TOP 100' }}</span>
+                <span class="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-primary/10 text-primary border border-primary/20"> {{ $fix ? 'DEBUG ('.count($results).')' : 'TOP 100' }}</span>
             </div>
             <div class="text-[10px] font-medium text-slate-400">
                 {{ count($results) }} résultat{{ count($results) > 1 ? 's' : '' }}

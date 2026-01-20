@@ -14,8 +14,12 @@
 <body class="bg-base-200 min-h-screen font-sans">
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-            <a href="/" class="text-xl font-bold tracking-tight text-gray-900 hover:text-primary transition-colors whitespace-nowrap">
-                <h1>{{ $title ?? 'CA Sion - Statistiques' }}</h1>
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity whitespace-nowrap group">
+                <img src="https://casion.ch/assets/logo/logo-casion.svg" alt="CA Sion Logo" class="h-8 lg:h-10 w-auto">
+                <div class="flex flex-col justify-center">
+                    <span class="text-base lg:text-xl font-bold tracking-tight text-gray-900 group-hover:text-primary transition-colors">CA Sion</span>
+                    <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold hidden lg:block">Statistiques</span>
+                </div>
             </a>
             
             <div class="flex-1 flex justify-center max-w-sm ml-auto">
@@ -36,13 +40,10 @@
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
             <h3 class="font-bold text-2xl mb-6 text-primary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 À propos des données
             </h3>
             
-            <div class="space-y-6 text-sm leading-relaxed text-gray-600">
+            <div class="space-y-6 text-xs lg:text-sm leading-relaxed text-gray-600">
                 <section>
                     <h4 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-xs">Historique</h4>
                     <ul class="space-y-2 list-disc list-inside">
@@ -54,19 +55,15 @@
 
                 <section class="bg-primary/5 p-4 rounded-xl border border-primary/10">
                     <h4 class="font-bold text-primary mb-2 uppercase tracking-wider text-xs">État de la base</h4>
-                    <p>Les résultats sont globalement complets jusqu'en <strong>juin 2017</strong>.</p>
+                    <p>Les résultats sont globalement complets jusqu'en <strong>décembre 2025</strong>.</p>
                 </section>
 
                 <section>
                     <h4 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-xs">Lacunes connues</h4>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <span class="font-bold block text-gray-900">2013</span>
+                            <span class="font-bold block text-gray-900">2021 (Indoor)</span>
                             Absence totale de données.
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <span class="font-bold block text-gray-900">2014</span>
-                            Données partielles.
                         </div>
                     </div>
                 </section>
