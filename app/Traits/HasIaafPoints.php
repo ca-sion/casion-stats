@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\IaafPointsService;
 
 trait HasIaafPoints
@@ -9,8 +10,10 @@ trait HasIaafPoints
     /**
      * Get the IAAF points for this result.
      */
-    public function getIaafPointsAttribute(): int
+    protected function iaafPointsCalculated(): Attribute
     {
-        return app(IaafPointsService::class)->getPoints($this);
+        return Attribute::make(
+            get: fn () => app(IaafPointsService::class)->getPoints($this),
+        );
     }
 }

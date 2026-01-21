@@ -9,6 +9,7 @@ use App\Models\Result;
 use App\Models\AthleteCategory;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class IaafPointsServiceTest extends TestCase
 {
@@ -22,9 +23,7 @@ class IaafPointsServiceTest extends TestCase
         $this->service = new IaafPointsService();
     }
 
-    /**
-     * @dataProvider mappingProvider
-     */
+    #[DataProvider('mappingProvider')]
     public function test_maps_disciplines_correctly($waCode, $nameFr, $expectedKey)
     {
         $discipline = Mockery::mock(Discipline::class);
@@ -67,9 +66,12 @@ class IaafPointsServiceTest extends TestCase
         $result = Mockery::mock(Result::class);
         
         // Mocking the attributes accessed in the service
+        $result->shouldReceive('getAttribute')->with('id')->andReturn(1);
         $result->shouldReceive('getAttribute')->with('discipline')->andReturn($discipline);
         $result->shouldReceive('getAttribute')->with('athleteCategory')->andReturn($category);
         $result->shouldReceive('getAttribute')->with('performance_normalized')->andReturn(10.00);
+        
+        $result->shouldReceive('isDirty')->andReturn(false);
         
         // Mocking offsetExists if called by Laravel/Mockery
         $result->shouldReceive('offsetExists')->andReturn(true);

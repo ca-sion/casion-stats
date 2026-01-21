@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Discipline;
+use App\Models\AthleteCategory;
 use App\Models\Result;
 use GlaivePro\IaafPoints\IaafCalculator;
 
@@ -19,9 +20,13 @@ class IaafPointsService
         '1500' => '1500m',
         '5000' => '5000m',
         '10000' => '10000m',
+        '50' => '50m',
+        '60' => '60m',
         '110H' => '110mh',
         '100H' => '100mh',
         '400H' => '400mh',
+        '60H' => '60mh',
+        '50H' => '50mh',
         '3KSC' => '3000mSt',
         '2KSC' => '2000mSt',
         'HJ' => 'high_jump',
@@ -43,23 +48,18 @@ class IaafPointsService
     protected static array $calculators = [];
 
     /**
-     * Cache for points to avoid redundant calculations within the same request.
-     */
-    protected static array $pointsCache = [];
-
-    /**
      * Calculate IAAF points for a given result.
      */
     public function getPoints(Result $result): int
     {
-        $cacheKey = $result->id;
-        if (isset(static::$pointsCache[$cacheKey])) {
-            return static::$pointsCache[$cacheKey];
+        $discipline = $result->discipline;
+        if ($result->isDirty('discipline_id') || !$discipline) {
+            $discipline = Discipline::find($result->discipline_id);
         }
 
-        $discipline = $result->discipline;
-        if (!$discipline) {
-            return 0;
+        $category = $result->athleteCategory;
+        if ($result->isDirty('athlete_category_id') || !$category) {
+            $category = AthleteCategory::find($result->athlete_category_id);
         }
 
         $iaafKey = $this->getIaafKey($discipline);
@@ -67,7 +67,7 @@ class IaafPointsService
             return 0;
         }
 
-        $gender = $result->athleteCategory?->genre ?? 'm';
+        $gender = $category?->genre ?? 'm';
         if ($gender === 'w') {
             $gender = 'f';
         }
@@ -84,9 +84,7 @@ class IaafPointsService
             ]);
         }
 
-        $points = (int) static::$calculators[$calcKey]->evaluate($result->performance_normalized);
-        
-        return static::$pointsCache[$cacheKey] = $points;
+        return (int) static::$calculators[$calcKey]->evaluate($result->performance_normalized);
     }
 
     /**
@@ -114,6 +112,10 @@ class IaafPointsService
         if (str_contains($name, '1500 m')) return '1500m';
         if (str_contains($name, '5000 m')) return '5000m';
         if (str_contains($name, '10000 m')) return '10000m';
+        if (preg_match('/^50 ?m/', $name) && !str_contains($name, 'haies')) return '50m';
+        if (preg_match('/^60 ?m/', $name) && !str_contains($name, 'haies')) return '60m';
+        if (str_contains($name, '50 m haies')) return '50mh';
+        if (str_contains($name, '60 m haies')) return '60mh';
         
         // Field events
         if (str_contains($name, 'hauteur')) return 'high_jump';
@@ -133,14 +135,9 @@ class IaafPointsService
      */
     protected function getVenue(Discipline $discipline): string
     {
-        $name = strtolower($discipline->name_fr);
-        
-        if (str_contains($name, 'indoor') || str_contains($name, 'salle')) {
-            return 'indoor';
-        }
+        $key = $this->getIaafKey($discipline);
 
-        // Common indoor-only or indoor-preferred disciplines (like 60m)
-        if (str_contains($name, '60 m')) {
+        if (in_array($key, ['50m', '60m', '50mh', '60mh'])) {
             return 'indoor';
         }
 

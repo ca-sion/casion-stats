@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Services\DataDiagnosticService;
 
 use App\Traits\HasIaafPoints;
+use App\Support\PerformanceNormalizer;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Builder;
 
 class Result extends Model
 {
-    use HasFactory, HasIaafPoints;
+    use HasFactory, HasIaafPoints, PerformanceNormalizer;
     
     /**
      * Store temporary diagnostics for the model.
@@ -27,28 +31,39 @@ class Result extends Model
     protected $guarded = [];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'performance_normalized' => 'float',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'performance_normalized' => 'float',
+        ];
+    }
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::observe(\App\Observers\ResultObserver::class);
+    }
+    
     /**
      * Scope a query to filter by discipline.
      */
-    public function scopeForDiscipline($query, $disciplineId)
+    public function scopeForDiscipline(Builder $query, $disciplineId): Builder
     {
-        return $query->where('discipline_id', $disciplineId);
+        return $query->when($disciplineId, fn ($q) => $q->where('discipline_id', $disciplineId));
     }
 
     /**
      * Scope a query to filter by athlete category.
      */
-    public function scopeForCategory($query, $categoryId, $inclusive = false)
+    public function scopeForCategory(Builder $query, $categoryId, bool $inclusive = false): Builder
     {
-        return $query->when($categoryId, function ($query, $categoryId) use ($inclusive) {
+        return $query->when($categoryId, function (Builder $query, $categoryId) use ($inclusive) {
             if (!$inclusive) {
                 $id = $categoryId instanceof AthleteCategory ? $categoryId->id : $categoryId;
                 return $query->where('athlete_category_id', $id);
@@ -62,27 +77,27 @@ class Result extends Model
                 return $query->where('athlete_category_id', $categoryId instanceof AthleteCategory ? $category->id : $categoryId);
             }
 
-            return $query->whereHas('athleteCategory', function ($q) use ($category) {
+            return $query->whereHas('athleteCategory', fn (Builder $q) => 
                 $q->where('genre', $category->genre)
-                  ->where('age_limit', '<=', $category->age_limit);
-            });
+                  ->where('age_limit', '<=', $category->age_limit)
+            );
         });
     }
 
     /**
      * Scope a query to filter by genre.
      */
-    public function scopeForGenre($query, $genre)
+    public function scopeForGenre(Builder $query, ?string $genre): Builder
     {
-        return $query->when($genre, function ($query, $genre) {
-            $query->whereRelation('athleteCategory', 'genre', $genre);
-        });
+        return $query->when($genre, fn (Builder $query, ?string $genre) => 
+            $query->whereRelation('athleteCategory', 'genre', $genre)
+        );
     }
 
     /**
      * Scope a query to sort by performance using the normalized value.
      */
-    public function scopeOrderedByPerformance($query, $direction = 'asc')
+    public function scopeOrderedByPerformance(Builder $query, string $direction = 'asc'): Builder
     {
         return $query->orderBy('performance_normalized', $direction);
     }
@@ -92,7 +107,7 @@ class Result extends Model
      * Note: This usually requires manual collection unique() or a complex subquery.
      * For now, we'll keep the logic consistent with unique() but encapsulate it if possible.
      */
-    public function scopeWithRelations($query)
+    public function scopeWithRelations(Builder $query): Builder
     {
         return $query->with(['athlete', 'athleteCategory', 'event']);
     }
@@ -136,26 +151,21 @@ class Result extends Model
     {
         return app(DataDiagnosticService::class)->getDiagnostics($this);
     }
-    /**
-     * The "booted" method of the model.
-     */
-    protected static function booted(): void
-    {
-        static::saving(function (Result $result) {
-            // Automatically calculate iaaf_points when saving
-            $result->iaaf_points = $result->getIaafPointsAttribute();
-        });
-    }
+    
 
     /**
      * Get the athlete's age at the time of the performance.
      */
-    public function getAthleteAgeAttribute()
+    protected function athleteAge(): Attribute
     {
-        if (!$this->athlete || !$this->event || $this->athlete->birthdate->year <= 1900) {
-            return null;
-        }
+        return Attribute::make(
+            get: function () {
+                if (!$this->athlete || !$this->event || $this->athlete->birthdate->year <= 1900) {
+                    return null;
+                }
 
-        return $this->event->date->year - $this->athlete->birthdate->year;
+                return $this->event->date->year - $this->athlete->birthdate->year;
+            }
+        );
     }
 }

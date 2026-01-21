@@ -355,7 +355,6 @@ class HistoricalImportService
             'event_id' => $event->id,
             'athlete_category_id' => $category->id,
             'performance' => $data['performance'],
-            'performance_normalized' => $this->parsePerformanceToSeconds($data['performance']),
             'wind' => $data['wind'],
             // 'rank' => $data['rank'], // User requested to ignore rank as it's likely "Best List" rank
         ]);

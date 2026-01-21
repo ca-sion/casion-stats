@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use App\Support\PerformanceNormalizer;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class PerformanceNormalizerTest extends TestCase
 {
@@ -20,9 +21,7 @@ class PerformanceNormalizerTest extends TestCase
         };
     }
 
-    /**
-     * @dataProvider performanceProvider
-     */
+    #[DataProvider('performanceProvider')]
     public function test_parses_performance_correctly($input, $expected)
     {
         $result = $this->normalizer->parsePerformanceToSeconds($input);

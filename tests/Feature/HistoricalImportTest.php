@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\Result;
 use App\Services\HistoricalImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HistoricalImportTest extends TestCase
@@ -23,7 +24,7 @@ class HistoricalImportTest extends TestCase
         $this->service = new HistoricalImportService();
     }
 
-    /** @test */
+    #[Test]
     public function it_can_parse_csv_file_correctly()
     {
         $path = base_path('resources/data/import-2010-indoor-test.csv');
@@ -49,7 +50,7 @@ class HistoricalImportTest extends TestCase
         $this->assertEquals('17.01.2010', $firstItem['date']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_map_disciplines_and_categories()
     {
         // 1. Create existing to test finding
@@ -74,7 +75,7 @@ class HistoricalImportTest extends TestCase
         $this->assertTrue($newCat->wasRecentlyCreated);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_resolve_athletes_in_various_scenarios()
     {
         // Scenario 1: Exact License Match
@@ -137,7 +138,7 @@ class HistoricalImportTest extends TestCase
         $this->assertDatabaseHas('athletes', ['first_name' => 'New']);
     }
 
-    /** @test */
+    #[Test]
     public function test_full_import_process_indoor_2010()
     {
         $path = base_path('resources/data/import-2010-indoor-test.csv');
@@ -170,6 +171,9 @@ class HistoricalImportTest extends TestCase
         // Check Result
         $result = Result::where('athlete_id', $bastien->id)->first();
         $this->assertEquals('6.81', $result->performance);
+        $this->assertEquals(6.81, $result->performance_normalized);
+        $this->assertNotNull($result->iaaf_points);
+        $this->assertGreaterThan(0, $result->iaaf_points);
         // $this->assertEquals(1, $result->rank); // Rank is now ignored during import
         
         // Check Event creation
@@ -177,7 +181,7 @@ class HistoricalImportTest extends TestCase
         $this->assertEquals('2010-01-17', $result->event->date->format('Y-m-d'));
     }
 
-    /** @test */
+    #[Test]
     public function test_full_import_process_outdoor_2024()
     {
         $path = base_path('resources/data/import-2024-outdoor-test.csv');
@@ -214,7 +218,7 @@ class HistoricalImportTest extends TestCase
         $this->assertEquals('2024-04-28', $result->event->date->format('Y-m-d'));
     }
 
-    /** @test */
+    #[Test]
     public function test_can_detect_duplicates_with_loose_event_matching()
     {
         // 1. Create Baseline Data
@@ -266,7 +270,7 @@ class HistoricalImportTest extends TestCase
         $this->assertTrue($exists, 'Should detect duplicate even if Event Name differs (Lausanne vs Meeting de Lausanne)');
     }
 
-    /** @test */
+    #[Test]
     public function test_detects_duplicate_with_different_category()
     {
         // 1. Create Baseline Data
@@ -319,7 +323,7 @@ class HistoricalImportTest extends TestCase
         
         $this->assertTrue($exists, 'Should detect duplicate even if Category differs (U23 W vs W)');
     }
-    /** @test */
+    #[Test]
     public function test_detects_duplicate_with_performance_string_mismatch()
     {
         // 1. Baseline: DB has "5.4" (Float-like string)
@@ -369,7 +373,7 @@ class HistoricalImportTest extends TestCase
         $this->assertTrue($exists, 'Should detect duplicate even if Performance string differs (5.4 vs 5.40)');
     }
 
-    /** @test */
+    #[Test]
     public function test_it_can_resolve_events_with_fuzzy_matching()
     {
         // 1. Setup existing competition

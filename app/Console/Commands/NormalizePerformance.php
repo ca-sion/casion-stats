@@ -20,20 +20,18 @@ class NormalizePerformance extends Command
      */
     protected $description = 'Normalize existing performance strings into numeric values for sorting.';
 
-    use \App\Support\PerformanceNormalizer;
-
     /**
      * Execute the console command.
      */
     public function handle()
     {
         $results = \App\Models\Result::all();
-        $this->info("Normalizing {$results->count()} results...");
+        $this->info("Triggering re-normalization for {$results->count()} results...");
 
         $bar = $this->output->createProgressBar($results->count());
 
         foreach ($results as $result) {
-            $result->performance_normalized = $this->parsePerformanceToSeconds($result->performance);
+            // Triggering save will fire the ResultObserver@saving
             $result->save();
             
             $bar->advance();
@@ -41,6 +39,6 @@ class NormalizePerformance extends Command
 
         $bar->finish();
         $this->newLine();
-        $this->info('Normalization complete!');
+        $this->info('Normalization triggered via Observer!');
     }
 }
