@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -59,7 +61,7 @@ class Athlete extends Model
     {
         return Attribute::make(
             get: function () {
-                if (!$this->birthdate || !$this->birthdate instanceof \Carbon\CarbonInterface) return null;
+                if (!$this->birthdate || !$this->birthdate instanceof CarbonInterface) return null;
                 $age = now()->year - $this->birthdate->year;
                 return AthleteCategory::where('genre', $this->genre)
                     ->where(function($q) use ($age) {
@@ -80,7 +82,7 @@ class Athlete extends Model
         return Attribute::make(
             get: function () {
                 $minDate = $this->results()->with('event')->get()->min('event.date');
-                return $minDate instanceof \Carbon\CarbonInterface ? $minDate->year : null;
+                return $minDate instanceof CarbonInterface ? $minDate->year : null;
             }
         );
     }
@@ -93,7 +95,7 @@ class Athlete extends Model
         return Attribute::make(
             get: function () {
                 $maxDate = $this->results()->with('event')->get()->max('event.date');
-                return $maxDate instanceof \Carbon\CarbonInterface ? $maxDate->year : null;
+                return $maxDate instanceof CarbonInterface ? $maxDate->year : null;
             }
         );
     }
@@ -101,7 +103,7 @@ class Athlete extends Model
     /**
      * Scope a query to filter athletes by category names.
      */
-    public function scopeInCategories(\Illuminate\Database\Eloquent\Builder $query, array $categoryNames): void
+    public function scopeInCategories(Builder $query, array $categoryNames): void
     {
         $allCategories = AthleteCategory::orderBy('age_limit')->get();
         $categoryNames = array_map('trim', $categoryNames);
