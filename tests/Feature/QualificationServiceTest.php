@@ -394,3 +394,38 @@ HTML;
     expect($results['data'][0]['athlete_name'])->toBe('Jumper Joe');
     // 6.00 > 5.50 -> Qualified
 });
+
+test('it decodes HTML entities in names and disciplines', function () {
+    $html = <<<HTML
+<div class="listheader">
+    <div class="leftheader">
+        <a href="#">50m haies U16 Gar&ccedil;ons</a>
+    </div>
+    <div class="entryline">
+       <div class="col-2"><div class="firstline">Ana&#239;s Dupont</div></div>
+       <div class="col-3"><div class="secondline">2011</div></div>
+       <div class="col-4"><div class="firstline">8,45</div></div>
+       <div class="col-4"><div class="firstline">U16W</div></div>
+       <div class="col-last">CA Sion</div>
+    </div>
+</div>
+HTML;
+
+    $limits = [
+        'years' => [now()->year],
+        'disciplines' => [
+            [
+                'discipline' => '50mH',
+                'categories' => ['U16W' => '9.00']
+            ]
+        ]
+    ];
+
+    $service = new QualificationService();
+    $results = $service->check($limits, [], [], 'CA Sion', [$html]);
+
+    expect($results['data'])->toHaveCount(1);
+    expect($results['data'][0]['athlete_name'])->toBe('Anaïs Dupont');
+    // Discipline raw should also be decoded although it might have been strip_tagged
+    expect($results['data'][0]['discipline_raw'])->toContain('Garçons');
+});

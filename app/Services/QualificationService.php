@@ -294,9 +294,9 @@ class QualificationService
             $discipline = 'Unknown';
             // Try explicit link text first, then div text
             if (preg_match('/class="leftheader"[^>]*>\s*<a[^>]*>(.*?)<\/a>/s', $block, $m)) {
-                $discipline = trim(strip_tags($m[1]));
+                $discipline = html_entity_decode(trim(strip_tags($m[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
             } elseif (preg_match('/class="leftheader"[^>]*>\s*(.*?)<\/div>/s', $block, $m)) {
-                $discipline = trim(strip_tags($m[1]));
+                $discipline = html_entity_decode(trim(strip_tags($m[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
             }
 
             // 2. Extract Entries
@@ -418,7 +418,7 @@ class QualificationService
     private function extractRegex($pattern, $subject, $all = false)
     {
         if (preg_match($pattern, $subject, $m)) {
-            return trim($m[1]);
+            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
         return '';
     }
