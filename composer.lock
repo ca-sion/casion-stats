@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99a4cb9ba7f05b9c63384403dc0e9a0c",
+    "content-hash": "0ab7ea68b2f14c847ff6b9d92b6945fd",
     "packages": [
         {
             "name": "brick/math",
@@ -578,6 +578,59 @@
                 }
             ],
             "time": "2025-12-03T09:33:47+00:00"
+        },
+        {
+            "name": "glaivepro/iaafpoints",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GlaivePro/IaafPoints.git",
+                "reference": "62d6bc0e2f203e593299af4474c7cba800312b2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GlaivePro/IaafPoints/zipball/62d6bc0e2f203e593299af4474c7cba800312b2a",
+                "reference": "62d6bc0e2f203e593299af4474c7cba800312b2a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0 <8.5"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=4.0 <11.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GlaivePro\\IaafPoints\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Juris Evertovskis",
+                    "email": "juris@glaive.pro",
+                    "homepage": "http://glaive.pro",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP library to calculate World Athletics (IAAF) scoring points of athletics and World Athletics (IAAF) scoring points for combined events.",
+            "homepage": "https://github.com/GlaivePro/IaafPoints",
+            "keywords": [
+                "athletics",
+                "iaaf",
+                "scoring tables",
+                "track and field",
+                "world athletics"
+            ],
+            "support": {
+                "issues": "https://github.com/GlaivePro/IaafPoints/issues",
+                "source": "https://github.com/GlaivePro/IaafPoints/tree/1.2.2"
+            },
+            "time": "2025-04-10T10:58:01+00:00"
         },
         {
             "name": "graham-campbell/result-type",

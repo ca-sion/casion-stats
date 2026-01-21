@@ -22,3 +22,4 @@ Route::get('/import-historical', ImportHistoricalData::class)->name('import.hist
 Route::get('/deduplicate-athletes', \App\Livewire\DeduplicateAthletes::class)->name('athletes.deduplicate');
 Route::get('/deduplicate-events', \App\Livewire\DeduplicateEvents::class)->name('events.deduplicate');
 Route::get('/deduplicate-disciplines', \App\Livewire\DeduplicateDisciplines::class)->name('disciplines.deduplicate');
+Route::get('/leaderboard', \App\Livewire\Leaderboard::class)->name('leaderboard');

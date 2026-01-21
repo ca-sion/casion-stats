@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Services\DataDiagnosticService;
 
+use App\Traits\HasIaafPoints;
+
 class Result extends Model
 {
-    use HasFactory;
+    use HasFactory, HasIaafPoints;
     
     /**
      * Store temporary diagnostics for the model.
@@ -134,6 +136,17 @@ class Result extends Model
     {
         return app(DataDiagnosticService::class)->getDiagnostics($this);
     }
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Result $result) {
+            // Automatically calculate iaaf_points when saving
+            $result->iaaf_points = $result->getIaafPointsAttribute();
+        });
+    }
+
     /**
      * Get the athlete's age at the time of the performance.
      */

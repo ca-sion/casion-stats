@@ -22,6 +22,12 @@
                 </div>
             </a>
             
+            <nav class="md:flex items-center gap-6 lg:ml-8">
+                <a href="{{ route('leaderboard') }}" class="text-sm font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors flex items-center gap-2 {{ request()->routeIs('leaderboard') ? 'text-slate-800' : '' }}">
+                    <span class="text-sm">🏆</span> <span class="hidden md:block">Mur des Légendes</span>
+                </a>
+            </nav>
+            
             <div class="flex-1 flex justify-center max-w-sm ml-auto">
                 <livewire:athlete-search />
             </div>
