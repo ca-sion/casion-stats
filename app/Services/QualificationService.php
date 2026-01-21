@@ -27,6 +27,10 @@ class QualificationService
     public function check(array $limitsJson, array $files = [], array $urls = [], string $clubFilter = 'CA Sion', array $htmlStrings = []): array
     {
         $limitDisciplines = collect($limitsJson['disciplines']);
+        $triggerDisciplines = $limitDisciplines
+            ->filter(fn($d) => !empty($d['qualifies_for']))
+            ->pluck('discipline')
+            ->toArray();
         $years = $limitsJson['years'] ?? [now()->year];
 
         // 1. Collect ALL Raw Results (DB + HTML + URL)
@@ -71,11 +75,23 @@ class QualificationService
             foreach ($limitConfigs as $limitConfig) {
                 // B. Determine Category & Limit
                 $targetCategory = $this->determineCategory($result, $limitConfig['categories'] ?? []);
-                if (!$targetCategory) continue; 
+                
+                $limitValue = null;
+                if ($targetCategory) {
+                    $limitValue = $limitConfig['categories'][$targetCategory] ?? null;
+                }
+                
+                // Gender specific global limits (global_M, global_W)
+                if (!$limitValue) {
+                    $genderKey = "global_" . $result['gender']; // global_M or global_W
+                    $limitValue = $limitConfig[$genderKey] ?? null;
+                    if ($limitValue) $targetCategory = 'Global ' . $result['gender'];
+                }
 
-                $limitValue = $limitConfig['categories'][$targetCategory] ?? null;
+                // Fallback to absolute global limit
                 if (!$limitValue) {
                     $limitValue = $limitConfig['global_limit'] ?? null;
+                    if ($limitValue) $targetCategory = 'Global';
                 }
 
                 if (!$limitValue) continue; 
@@ -87,42 +103,134 @@ class QualificationService
                 if ($limitSeconds === null || $perfSeconds === null) continue;
 
                 $isField = $this->isFieldEvent($limitConfig['discipline']);
+                
+                // Qualify?
                 $qualifiedBool = $isField ? ($perfSeconds >= $limitSeconds) : ($perfSeconds <= $limitSeconds);
 
                 if ($qualifiedBool) {
-                    $result['limit_hit'] = $limitValue;
-                    $result['category_hit'] = $targetCategory;
-                    $result['discipline_matched'] = $limitConfig['discipline'];
-                    $result['discipline_name'] = $limitConfig['discipline'];
-                    $qualified->push($result);
-                    break; // If qualified in one variant, we are good? Or keep best? 
-                           // Simplest: Qualified is Qualified.
+                    $baseResult = array_merge($result, [
+                        'limit_hit' => $limitValue,
+                        'category_hit' => $targetCategory,
+                        'discipline_matched' => $limitConfig['discipline'],
+                        'discipline_name' => $limitConfig['discipline'],
+                        'status' => 'qualified',
+                        'diff_percent' => 0,
+                        'limit_hit_discipline' => $limitConfig['discipline'],
+                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines)
+                    ]);
+
+                    $qualified->push($baseResult);
+
+                    // Secondary limits: If this discipline qualifies for others
+                    if (isset($limitConfig['qualifies_for']) && is_array($limitConfig['qualifies_for'])) {
+                        foreach ($limitConfig['qualifies_for'] as $primaryCode) {
+                            $secondaryResult = $baseResult;
+                            $secondaryResult['discipline_matched'] = $primaryCode;
+                            $secondaryResult['discipline_name'] = $primaryCode;
+                            $secondaryResult['via_secondary'] = $limitConfig['discipline'];
+                            $secondaryResult['has_qualifies_for'] = in_array($primaryCode, $triggerDisciplines);
+                            // Keep 'limit_hit' as is (the source limit), but it's now clear it's via secondary
+                            $qualified->push($secondaryResult);
+                        }
+                    }
+                    break; 
+                }
+
+                // Near Miss? (+/- 5%)
+                $margin = 0.05;
+                $isNearMiss = false;
+                $diffPercent = 0;
+
+                if ($limitSeconds > 0) {
+                    if ($isField) {
+                        // Field: % of limit reached (e.g. 5.80 / 6.00 = 96.6%)
+                        $diffPercent = ($perfSeconds / $limitSeconds) * 100;
+                        if ($perfSeconds >= $limitSeconds * (1 - $margin)) $isNearMiss = true;
+                    } else {
+                        // Track: % of limit (e.g. 10.30 / 10.00 = 103%)
+                        $diffPercent = ($perfSeconds / $limitSeconds) * 100;
+                        if ($perfSeconds <= $limitSeconds * (1 + $margin)) $isNearMiss = true;
+                    }
+                }
+
+                if ($isNearMiss) {
+                    $qualified->push(array_merge($result, [
+                        'limit_hit' => $limitValue,
+                        'category_hit' => $targetCategory,
+                        'discipline_matched' => $limitConfig['discipline'],
+                        'discipline_name' => $limitConfig['discipline'],
+                        'status' => 'near_miss',
+                        'diff_percent' => round($diffPercent, 1),
+                        'limit_hit_discipline' => $limitConfig['discipline'],
+                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines)
+                    ]));
+                    // Don't break, keep looking for full qualification
                 }
             }
         }
 
-        // 3. Deduplicate (Keep best performance per athlete/discipline)
-        // Group by Athlete + Main Discipline Name (ignore variants like 84.0?)
-        // Actually, we want to list exactly what they qualified for.
-        
+        // 3. Deduplicate (Keep best performance per athlete/target_discipline/source_discipline)
+        // Grouping by athlete + target discipline + source discipline (direct or secondary source)
         $uniqueQualified = $qualified->groupBy(function ($item) {
-            return Str::slug($item['athlete_name']) . '|' . $item['discipline_matched'];
+            $sourceKey = $item['via_secondary'] ?? 'direct';
+            return Str::slug($item['athlete_name']) . '|' . $item['discipline_matched'] . '|' . $sourceKey;
         })->map(function ($group) {
             $disc = $group->first()['discipline_matched'];
             $isField = $this->isFieldEvent($disc);
 
+            // Prioritize status 'qualified' over 'near_miss' for this specific path
+            $hasQualified = $group->contains('status', 'qualified');
+            $filtered = $hasQualified ? $group->where('status', 'qualified') : $group;
+
             if ($isField) {
-                return $group->sortByDesc('performance_seconds')->first();
+                return $filtered->sortByDesc('performance_seconds')->first();
             }
-            return $group->sortBy('performance_seconds')->first();
+            return $filtered->sortBy('performance_seconds')->first();
+        });
+
+        $finalData = $uniqueQualified->values()->map(function ($res) use ($rawResults, $limitDisciplines) {
+            if (isset($res['via_secondary'])) {
+                // Secondary qualification: find the best ACTUAL performance in the PRIMARY discipline
+                $primaryPerf = $rawResults->where('athlete_name', $res['athlete_name'])
+                    ->where('discipline_name', $res['discipline_matched'])
+                    ->sortBy(function ($p) {
+                        return $this->isFieldEvent($p['discipline_name']) ? -$p['performance_seconds'] : $p['performance_seconds'];
+                    })->first();
+
+                if ($primaryPerf) {
+                    $res['primary_performance_display'] = $primaryPerf['performance_display'];
+                }
+
+                // Also find the PRIMARY discipline's LIMIT for this athlete/category
+                $primaryLimitDict = $limitDisciplines->firstWhere('discipline', $res['discipline_matched']);
+                if ($primaryLimitDict) {
+                    $limitValue = null;
+                    // Re-calculate target category for primary if needed, but usually same
+                    $targetCat = $this->determineCategory($res, $primaryLimitDict['categories'] ?? []);
+                    if ($targetCat) {
+                        $limitValue = $primaryLimitDict['categories'][$targetCat] ?? null;
+                    }
+                    if (!$limitValue) {
+                        $genderKey = "global_" . $res['gender'];
+                        $limitValue = $primaryLimitDict[$genderKey] ?? ($primaryLimitDict['global_limit'] ?? null);
+                    }
+                    $res['primary_limit'] = $limitValue;
+                }
+                
+                // Keep secondary info for display
+                $res['secondary_perf'] = $res['performance_display'];
+                $res['secondary_limit'] = $res['limit_hit'];
+            }
+            return $res;
         });
 
         return [
-            'data' => $uniqueQualified->values()->all(),
+            'data' => $finalData->all(),
             'stats' => [
                 'raw_fetched' => $rawResults->count(),
                 'analyzed' => $analyzedCount,
-                'qualified' => $uniqueQualified->count(),
+                'qualified' => $finalData->where('status', 'qualified')->count(),
+                'near_miss' => $finalData->where('status', 'near_miss')->count(),
             ]
         ];
     }

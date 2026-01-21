@@ -21,6 +21,15 @@ class CheckQualifications extends Component
     public $errorMsg = null;
     public $isLoading = false;
 
+    public function downloadExample($filename)
+    {
+        $path = base_path('resources/data/' . $filename);
+        if (file_exists($path)) {
+            return response()->download($path);
+        }
+        $this->errorMsg = "Fichier introuvable: $filename";
+    }
+
     public function check(QualificationService $service)
     {
         $this->results = null;

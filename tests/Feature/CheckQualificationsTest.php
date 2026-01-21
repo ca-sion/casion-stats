@@ -93,3 +93,9 @@ HTML
             return count($results) === 1 && $results[0]['athlete_name'] === 'Url Runner';
         });
 });
+
+test('it can download example files', function () {
+    Livewire::test(CheckQualifications::class)
+        ->call('downloadExample', 'limits.example.json')
+        ->assertStatus(200);
+});

@@ -1,0 +1,341 @@
+{
+  "years": [2025, 2026],
+  "disciplines": [
+    {
+        "discipline": "50m",
+        "qualifies_for": ["60m"],
+        "categories": {
+        "U16M": "6.80",
+        "U18M": "6.50",
+        "U20M": "6.45",
+        "U16W": "7.20",
+        "U18W": "7.05",
+        "U20W": "7.05"
+        }
+    },
+    {
+        "discipline": "60m",
+        "categories": {
+        "U16M": "7.90",
+        "U18M": "7.55",
+        "U20M": "7.50",
+        "U16W": "8.30",
+        "U18W": "8.20",
+        "U20W": "8.20"
+        }
+    },
+    {
+        "discipline": "80m",
+        "categories": {
+        "U16M": "10.10",
+        "U18M": "9.65",
+        "U20M": null,
+        "U16W": "10.45",
+        "U18W": "10.20",
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "100m",
+        "categories": {
+        "U16M": "11.60",
+        "U18M": "11.60",
+        "U20M": "11.45",
+        "U16W": "12.60",
+        "U18W": "12.60",
+        "U20W": "12.60"
+        }
+    },
+    {
+        "discipline": "200m",
+        "categories": {
+        "U16M": null,
+        "U18M": "24.10",
+        "U20M": "23.40",
+        "U16W": null,
+        "U18W": "26.90",
+        "U20W": "26.60"
+        }
+    },
+    {
+        "discipline": "400m",
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": "52.00",
+        "U16W": null,
+        "U18W": null,
+        "U20W": "61.00"
+        }
+    },
+    {
+        "discipline": "600m",
+        "categories": {
+        "U16M": "1:37.00",
+        "U18M": null,
+        "U20M": null,
+        "U16W": "1:47.00",
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "800m",
+        "categories": {
+        "U16M": null,
+        "U18M": "2:07.00",
+        "U20M": "2:04.00",
+        "U16W": null,
+        "U18W": "2:29.00",
+        "U20W": "2:28.00"
+        }
+    },
+    {
+        "discipline": "1000m",
+        "categories": {
+        "U16M": "2:58.00",
+        "U18M": "2:45.00",
+        "U20M": "2:42.00",
+        "U16W": "3:17.00",
+        "U18W": "3:16.00",
+        "U20W": "3:14.00"
+        }
+    },
+    {
+        "discipline": "1500m",
+        "categories": {
+        "U16M": null,
+        "U18M": "4:25.00",
+        "U20M": "4:15.00",
+        "U16W": null,
+        "U18W": "5:12.00",
+        "U20W": "5:08.00"
+        }
+    },
+    {
+        "discipline": "2000m",
+        "categories": {
+        "U16M": "6:28.00",
+        "U18M": null,
+        "U20M": null,
+        "U16W": "7:10.00",
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "50m haies (76.2)",
+        "qualifies_for": ["60mH"],
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": null,
+        "U16W": "8.60",
+        "U18W": "8.30",
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "50m haies (84.0)",
+        "qualifies_for": ["60mH"],
+        "categories": {
+        "U16M": "8.60",
+        "U18M": null,
+        "U20M": null,
+        "U16W": null,
+        "U18W": null,
+        "U20W": "8.50"
+        }
+    },
+    {
+        "discipline": "50mH (91.4)",
+        "qualifies_for": ["60mH"],
+        "categories": {
+        "U16M": null,
+        "U18M": "8.00",
+        "U20M": null,
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "50mH (99.1)",
+        "qualifies_for": ["60mH"],
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": "7.90",
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "60mH",
+        "categories": {
+        "U16M": "9.80",
+        "U18M": "9.30",
+        "U20M": "9.30",
+        "U16W": "9.80",
+        "U18W": "9.50",
+        "U20W": "9.70"
+        }
+    },
+    {
+        "discipline": "80mH (76.2)",
+        "categories": {
+        "U16M": "13.50",
+        "U18M": null,
+        "U20M": null,
+        "U16W": "13.20",
+        "U18W": "12.90",
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "100mH (76.2)",
+        "qualifies_for": ["60mH"],
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": null,
+        "U16W": null,
+        "U18W": "15.70",
+        "U20W": "15.80"
+        }
+    },
+    {
+        "discipline": "100mH (84.0)",
+        "categories": {
+        "U16M": "15.50",
+        "U18M": "15.50",
+        "U20M": null,
+        "U16W": null,
+        "U18W": null,
+        "U20W": "16.60"
+        }
+    },
+    {
+        "discipline": "110mH (91.4)",
+        "categories": {
+        "U16M": null,
+        "U18M": "16.00",
+        "U20M": "16.00",
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "110mH (99.1)",
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": "16.50",
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "Hoch / hauteur",
+        "categories": {
+        "U16M": "1.70",
+        "U18M": "1.80",
+        "U20M": "1.82",
+        "U16W": "1.55",
+        "U18W": "1.60",
+        "U20W": "1.60"
+        }
+    },
+    {
+        "discipline": "Stab / perche",
+        "categories": {
+        "U16M": "2.60",
+        "U18M": "3.40",
+        "U20M": "3.80",
+        "U16W": "2.40",
+        "U18W": "2.70",
+        "U20W": "2.80"
+        }
+    },
+    {
+        "discipline": "Weit Zone / longueur zone",
+        "categories": {
+        "U16M": "5.90",
+        "U18M": null,
+        "U20M": null,
+        "U16W": "5.35",
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "Weit / longueur",
+        "categories": {
+        "U16M": "5.70",
+        "U18M": "6.20",
+        "U20M": "6.40",
+        "U16W": "5.15",
+        "U18W": "5.40",
+        "U20W": "5.50"
+        }
+    },
+    {
+        "discipline": "Drei / triple",
+        "categories": {
+        "U16M": "10.20",
+        "U18M": "11.20",
+        "U20M": "11.80",
+        "U16W": "9.70",
+        "U18W": "10.10",
+        "U20W": "10.40"
+        }
+    },
+    {
+        "discipline": "Kugel / poids 3kg",
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": null,
+        "U16W": "10.50",
+        "U18W": "11.50",
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "Kugel / poids 4kg",
+        "categories": {
+        "U16M": "11.80",
+        "U18M": "12.60",
+        "U20M": null,
+        "U16W": null,
+        "U18W": null,
+        "U20W": "10.00"
+        }
+    },
+    {
+        "discipline": "Kugel / poids 5kg",
+        "categories": {
+        "U16M": null,
+        "U18M": "12.10",
+        "U20M": null,
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    },
+    {
+        "discipline": "Kugel / poids 6kg",
+        "categories": {
+        "U16M": null,
+        "U18M": null,
+        "U20M": "11.80",
+        "U16W": null,
+        "U18W": null,
+        "U20W": null
+        }
+    }
+  ]
+}

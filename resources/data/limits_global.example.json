@@ -1,0 +1,23 @@
+{
+  "years": [2025, 2026],
+  "disciplines": [
+    {
+      "discipline": "100m",
+      "global_M": "12.00",
+      "global_W": "13.50",
+      "categories": {
+        "U18M": "11.50",
+        "U20M": "11.20"
+      }
+    },
+    {
+      "discipline": "50m",
+      "categories": { "U16M": "7.00" },
+      "qualifies_for": ["60m"]
+    },
+    {
+      "discipline": "Longueur",
+      "global_limit": "5.50"
+    }
+  ]
+}
