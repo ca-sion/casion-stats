@@ -12,4 +12,6 @@ Route::prefix('v1')->group(function () {
     
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/disciplines', [DisciplineController::class, 'index']);
+    
+    Route::post('/qualifications/check', [\App\Http\Controllers\Api\V1\QualificationController::class, 'check']);
 });
