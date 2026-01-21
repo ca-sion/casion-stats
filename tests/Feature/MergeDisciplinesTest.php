@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class MergeDisciplinesTest extends TestCase
@@ -26,8 +25,8 @@ class MergeDisciplinesTest extends TestCase
         $this->artisan("app:merge-disciplines --from={$source1->id},{$source2->id} --to={$target->id}")
             ->expectsOutput("Merging 2 disciplines into 'Target Discipline' (ID: {$target->id})")
             ->expectsConfirmation('Do you wish to continue?', 'yes')
-            ->expectsOutput("Reassigned 5 results.")
-            ->expectsOutput("Deleted 2 source disciplines.")
+            ->expectsOutput('Reassigned 5 results.')
+            ->expectsOutput('Deleted 2 source disciplines.')
             ->assertExitCode(0);
 
         // 3. Verify

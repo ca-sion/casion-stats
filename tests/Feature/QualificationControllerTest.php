@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\AthleteCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -16,13 +16,13 @@ test('it can check qualifications via api with multiple files', function () {
     $limitsJson = json_encode([
         'years' => [2026],
         'disciplines' => [
-            ['discipline' => '50m', 'categories' => ['U16M' => '10.00']]
-        ]
+            ['discipline' => '50m', 'categories' => ['U16M' => '10.00']],
+        ],
     ]);
-    
+
     $limitsFile = UploadedFile::fake()->createWithContent('limits.json', $limitsJson);
-    
-    $html = <<<HTML
+
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">50m U16M</div>
     <div class="entryline">
@@ -39,15 +39,15 @@ HTML;
 
     $response = $this->postJson('/api/v1/qualifications/check', [
         'limits_file' => $limitsFile,
-        'html_files' => [$resultFile1, $resultFile2]
+        'html_files' => [$resultFile1, $resultFile2],
     ]);
 
     $response->assertStatus(200);
     $response->assertJsonStructure([
         'data',
-        'stats' => ['raw_fetched', 'analyzed', 'qualified']
+        'stats' => ['raw_fetched', 'analyzed', 'qualified'],
     ]);
-    
+
     // Deduplication should result in 1 athlete
     $response->assertJsonCount(1, 'data');
     expect($response->json('data.0.athlete_name'))->toBe('Api Runner');
@@ -55,7 +55,7 @@ HTML;
 
 test('it can check qualifications via api with urls', function () {
     Http::fake([
-        'example.com/*' => Http::response(<<<HTML
+        'example.com/*' => Http::response(<<<'HTML'
 <div class="listheader">
     <div class="leftheader">50m U16M</div>
     <div class="entryline">
@@ -67,20 +67,20 @@ test('it can check qualifications via api with urls', function () {
     </div>
 </div>
 HTML
-        , 200)
+            , 200),
     ]);
 
     $limitsJson = json_encode([
         'years' => [2026],
         'disciplines' => [
-            ['discipline' => '50m', 'categories' => ['U16M' => '10.00']]
-        ]
+            ['discipline' => '50m', 'categories' => ['U16M' => '10.00']],
+        ],
     ]);
     $limitsFile = UploadedFile::fake()->createWithContent('limits.json', $limitsJson);
 
     $response = $this->postJson('/api/v1/qualifications/check', [
         'limits_file' => $limitsFile,
-        'urls' => "https://example.com/results"
+        'urls' => 'https://example.com/results',
     ]);
 
     $response->assertStatus(200);

@@ -8,6 +8,7 @@ use Livewire\Component;
 class AthleteSearch extends Component
 {
     public $query = '';
+
     public $results = [];
 
     public function updatedQuery()
@@ -16,14 +17,16 @@ class AthleteSearch extends Component
 
         if (strlen($this->query) >= 2) {
             $terms = explode(' ', $this->query);
-            
+
             $queryBuilder = Athlete::query();
 
             foreach ($terms as $term) {
-                if (empty($term)) continue;
-                $queryBuilder->where(function($q) use ($term) {
-                    $q->where('first_name', 'like', '%' . $term . '%')
-                      ->orWhere('last_name', 'like', '%' . $term . '%');
+                if (empty($term)) {
+                    continue;
+                }
+                $queryBuilder->where(function ($q) use ($term) {
+                    $q->where('first_name', 'like', '%'.$term.'%')
+                        ->orWhere('last_name', 'like', '%'.$term.'%');
                 });
             }
 

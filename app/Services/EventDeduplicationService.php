@@ -25,21 +25,27 @@ class EventDeduplicationService
         });
 
         foreach ($byDate as $date => $group) {
-            if ($group->count() < 2) continue;
+            if ($group->count() < 2) {
+                continue;
+            }
 
             $groupArray = $group->values();
             $count = $groupArray->count();
 
             for ($i = 0; $i < $count; $i++) {
                 $a = $groupArray[$i];
-                if (in_array($a->id, $processedIds)) continue;
+                if (in_array($a->id, $processedIds)) {
+                    continue;
+                }
 
                 $cluster = [$a];
                 $hasDuplicates = false;
 
                 for ($j = $i + 1; $j < $count; $j++) {
                     $b = $groupArray[$j];
-                    if (in_array($b->id, $processedIds)) continue;
+                    if (in_array($b->id, $processedIds)) {
+                        continue;
+                    }
 
                     if ($this->arePotentialDuplicates($a, $b)) {
                         $cluster[] = $b;
@@ -79,13 +85,13 @@ class EventDeduplicationService
         // 2. Fuzzy Name Match
         $percent = 0;
         similar_text($nameA, $nameB, $percent);
-        
+
         if ($percent > 85) {
             return true;
         }
 
         // 3. Location awareness if similarity is lower but location matches
-        if ($percent > 70 && !empty($a->location) && !empty($b->location)) {
+        if ($percent > 70 && ! empty($a->location) && ! empty($b->location)) {
             if (strtolower($a->location) === strtolower($b->location)) {
                 return true;
             }
@@ -105,13 +111,13 @@ class EventDeduplicationService
                 ->update(['event_id' => $primary->id]);
 
             // 2. Merge Metadata (fill gaps in primary)
-            if (empty($primary->location) && !empty($secondary->location)) {
+            if (empty($primary->location) && ! empty($secondary->location)) {
                 $primary->location = $secondary->location;
             }
-            if (empty($primary->link) && !empty($secondary->link)) {
+            if (empty($primary->link) && ! empty($secondary->link)) {
                 $primary->link = $secondary->link;
             }
-            if (empty($primary->event_category_id) && !empty($secondary->event_category_id)) {
+            if (empty($primary->event_category_id) && ! empty($secondary->event_category_id)) {
                 $primary->event_category_id = $secondary->event_category_id;
             }
 

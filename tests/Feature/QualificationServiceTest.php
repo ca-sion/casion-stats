@@ -8,13 +8,12 @@ use App\Models\Result;
 use App\Services\QualificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->service = new QualificationService();
-    
+    $this->service = new QualificationService;
+
     // Seed generic categories needed for logic
     // We need simple U16M, U16W, etc.
     AthleteCategory::factory()->create(['name' => 'U16M', 'genre' => 'M', 'age_limit' => 15]);
@@ -24,7 +23,7 @@ beforeEach(function () {
 });
 
 test('it parses html content with complex structure regarding generic disciplines', function () {
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">
         <a href="#">50m haies U16 Hommes Séries</a>
@@ -47,13 +46,13 @@ HTML;
         'disciplines' => [
             [
                 'discipline' => '50mH (84.0)',
-                'categories' => ['U16M' => '8.60']
-            ]
-        ]
+                'categories' => ['U16M' => '8.60'],
+            ],
+        ],
     ];
 
     $results = $this->service->check($limits, [$file]);
-    
+
     expect($results['data'])->toHaveCount(1);
     expect($results['data'][0]['athlete_name'])->toBe('Julen Malick');
     expect($results['data'][0]['performance_display'])->toBe('8.45');
@@ -68,12 +67,12 @@ test('it handles global_limit when category is unknown', function () {
         'disciplines' => [
             [
                 'discipline' => 'Longueur',
-                'global_limit' => '6.00'
-            ]
-        ]
+                'global_limit' => '6.00',
+            ],
+        ],
     ];
 
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">Longueur</div>
     <div class="entryline">
@@ -86,9 +85,9 @@ test('it handles global_limit when category is unknown', function () {
 </div>
 HTML;
 
-    $service = new \App\Services\QualificationService();
+    $service = new \App\Services\QualificationService;
     $output = $service->check($limits, [], [], 'CA Sion', [$html]);
-    
+
     expect($output['stats']['qualified'])->toBe(1);
     expect($output['data'][0]['category_hit'])->toBe('Global');
     expect($output['data'][0]['athlete_name'])->toBe('Global Jumper');
@@ -99,11 +98,11 @@ test('it identifies near misses within 5% margin', function () {
         'years' => [2026],
         'disciplines' => [
             ['discipline' => '100m', 'categories' => ['U16M' => '10.00']], // Track: max 10.50
-            ['discipline' => 'Longueur', 'categories' => ['U16M' => '6.00']] // Field: min 5.70
-        ]
+            ['discipline' => 'Longueur', 'categories' => ['U16M' => '6.00']], // Field: min 5.70
+        ],
     ];
 
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">100m</div>
     <div class="entryline">
@@ -126,12 +125,12 @@ test('it identifies near misses within 5% margin', function () {
 </div>
 HTML;
 
-    $service = new \App\Services\QualificationService();
+    $service = new \App\Services\QualificationService;
     $output = $service->check($limits, [], [], 'CA Sion', [$html]);
-    
+
     expect($output['stats']['qualified'])->toBe(0);
     expect($output['stats']['near_miss'])->toBe(2);
-    
+
     $results = collect($output['data']);
     expect($results->where('athlete_name', 'Slow Runner')->first()['status'])->toBe('near_miss');
     expect($results->where('athlete_name', 'Short Jumper')->first()['status'])->toBe('near_miss');
@@ -144,12 +143,12 @@ test('it handles gender-specific global limits', function () {
             [
                 'discipline' => '100m',
                 'global_M' => '11.00',
-                'global_W' => '12.50'
-            ]
-        ]
+                'global_W' => '12.50',
+            ],
+        ],
     ];
 
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">100m</div>
     <div class="entryline">
@@ -169,11 +168,11 @@ test('it handles gender-specific global limits', function () {
 </div>
 HTML;
 
-    $service = new \App\Services\QualificationService();
+    $service = new \App\Services\QualificationService;
     $output = $service->check($limits, [], [], 'CA Sion', [$html]);
-    
+
     expect($output['stats']['qualified'])->toBe(2);
-    
+
     $results = collect($output['data']);
     expect($results->where('athlete_name', 'Male Sprinter')->first()['category_hit'])->toBe('Global M');
     expect($results->where('athlete_name', 'Female Sprinter')->first()['category_hit'])->toBe('Global W');
@@ -186,16 +185,16 @@ test('it handles secondary limits (qualifies_for)', function () {
             [
                 'discipline' => '50m',
                 'categories' => ['U16M' => '7.00'],
-                'qualifies_for' => ['60m']
+                'qualifies_for' => ['60m'],
             ],
             [
                 'discipline' => '60m',
-                'categories' => ['U16M' => '8.00']
-            ]
-        ]
+                'categories' => ['U16M' => '8.00'],
+            ],
+        ],
     ];
 
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">50m</div>
     <div class="entryline">
@@ -218,19 +217,19 @@ test('it handles secondary limits (qualifies_for)', function () {
 </div>
 HTML;
 
-    $service = new \App\Services\QualificationService();
+    $service = new \App\Services\QualificationService;
     $output = $service->check($limits, [], [], 'CA Sion', [$html]);
-    
+
     // Should have 2 entries in data: 1 for 50m, 1 for 60m
     expect(count($output['data']))->toBe(2);
-    
+
     $results = collect($output['data']);
     expect($results->where('discipline_name', '50m')->first())->not->toBeNull();
     $runner60 = $results->where('discipline_name', '60m')->first();
     expect($runner60['via_secondary'])->toBe('50m');
     expect($runner60['secondary_perf'])->toBe('6.90');
-    expect($runner60['secondary_limit'])->toBe('7.00'); 
-    expect($runner60['primary_limit'])->toBe('8.00'); 
+    expect($runner60['secondary_limit'])->toBe('7.00');
+    expect($runner60['primary_limit'])->toBe('8.00');
     expect($runner60['primary_performance_display'])->toBe('8.50');
 });
 
@@ -241,16 +240,16 @@ test('it handles multiple qualification paths for the same discipline', function
             [
                 'discipline' => '50m',
                 'categories' => ['U16M' => '7.00'],
-                'qualifies_for' => ['60m']
+                'qualifies_for' => ['60m'],
             ],
             [
                 'discipline' => '60m',
-                'categories' => ['U16M' => '8.00']
-            ]
-        ]
+                'categories' => ['U16M' => '8.00'],
+            ],
+        ],
     ];
 
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">50m</div>
     <div class="entryline">
@@ -273,18 +272,18 @@ test('it handles multiple qualification paths for the same discipline', function
 </div>
 HTML;
 
-    $service = new \App\Services\QualificationService();
+    $service = new \App\Services\QualificationService;
     $output = $service->check($limits, [], [], 'CA Sion', [$html]);
-    
-    // Should have 3 entries: 
+
+    // Should have 3 entries:
     // 1. 50m (Direct)
     // 2. 60m (Direct)
     // 3. 60m (Via 50m)
     expect(count($output['data']))->toBe(3);
-    
+
     $results = collect($output['data']);
     expect($results->where('discipline_name', '50m')->count())->toBe(1);
-    
+
     $sixtyResults = $results->where('discipline_name', '60m');
     expect($sixtyResults->count())->toBe(2);
     expect($sixtyResults->where('via_secondary', null)->count())->toBe(1);
@@ -296,21 +295,21 @@ test('it handles database results correctly', function () {
     $disc = Discipline::factory()->create(['name_fr' => '100 m', 'code' => '100m']);
     $cat = AthleteCategory::where('name', 'U16M')->first();
     $athlete = Athlete::factory()->create([
-        'last_name' => 'Bolt', 
-        'first_name' => 'Usbain', 
-        'genre' => 'M', 
-        'birthdate' => '2011-01-01'
+        'last_name' => 'Bolt',
+        'first_name' => 'Usbain',
+        'genre' => 'M',
+        'birthdate' => '2011-01-01',
     ]);
-    
+
     $event = Event::factory()->create(['date' => '2026-06-01']);
-    
+
     Result::factory()->create([
         'athlete_id' => $athlete->id,
         'discipline_id' => $disc->id,
         'event_id' => $event->id,
         'athlete_category_id' => $cat->id,
         'performance' => '10.50',
-        'performance_normalized' => 10.50
+        'performance_normalized' => 10.50,
     ]);
 
     $limits = [
@@ -318,13 +317,13 @@ test('it handles database results correctly', function () {
         'disciplines' => [
             [
                 'discipline' => '100m',
-                'categories' => ['U16M' => '11.00']
-            ]
-        ]
+                'categories' => ['U16M' => '11.00'],
+            ],
+        ],
     ];
 
     $results = $this->service->check($limits, []);
-    
+
     expect($results['data'])->toHaveCount(1);
     expect($results['data'][0]['athlete_name'])->toContain('Bolt');
     expect($results['data'][0]['limit_hit'])->toBe('11.00');
@@ -332,7 +331,7 @@ test('it handles database results correctly', function () {
 
 test('it filters out unqualified results', function () {
     // HTML with slow result
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">100m U16M</div>
     <div class="entryline">
@@ -351,20 +350,20 @@ HTML;
         'disciplines' => [
             [
                 'discipline' => '100m',
-                'categories' => ['U16M' => '11.00']
-            ]
-        ]
+                'categories' => ['U16M' => '11.00'],
+            ],
+        ],
     ];
 
     $results = $this->service->check($limits, [$file]);
-    
+
     expect($results['data'])->toBeEmpty();
     expect($results['stats']['raw_fetched'])->toBe(1);
     expect($results['stats']['qualified'])->toBe(0);
 });
 
 test('it correctly identifies field events (greater than logic)', function () {
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">Longueur U16M</div>
     <div class="entryline">
@@ -383,20 +382,20 @@ HTML;
         'disciplines' => [
             [
                 'discipline' => 'Longueur',
-                'categories' => ['U16M' => '5.50']
-            ]
-        ]
+                'categories' => ['U16M' => '5.50'],
+            ],
+        ],
     ];
 
     $results = $this->service->check($limits, [$file]);
-    
+
     expect($results['data'])->toHaveCount(1);
     expect($results['data'][0]['athlete_name'])->toBe('Jumper Joe');
     // 6.00 > 5.50 -> Qualified
 });
 
 test('it decodes HTML entities in names and disciplines', function () {
-    $html = <<<HTML
+    $html = <<<'HTML'
 <div class="listheader">
     <div class="leftheader">
         <a href="#">50m haies U16 Gar&ccedil;ons</a>
@@ -416,12 +415,12 @@ HTML;
         'disciplines' => [
             [
                 'discipline' => '50mH',
-                'categories' => ['U16W' => '9.00']
-            ]
-        ]
+                'categories' => ['U16W' => '9.00'],
+            ],
+        ],
     ];
 
-    $service = new QualificationService();
+    $service = new QualificationService;
     $results = $service->check($limits, [], [], 'CA Sion', [$html]);
 
     expect($results['data'])->toHaveCount(1);

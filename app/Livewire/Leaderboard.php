@@ -9,8 +9,11 @@ use Livewire\Component;
 class Leaderboard extends Component
 {
     public $genre = '';
+
     public $categoryId = '';
+
     public $limit = 100;
+
     public $readyToLoad = false;
 
     public function loadData()
@@ -21,7 +24,7 @@ class Leaderboard extends Component
     public function render()
     {
         $results = collect();
-        
+
         if ($this->readyToLoad) {
             // Perform real-time SQL ranking for sub-200ms performance
             // Step 1: Find the best iaaf_points per athlete in the database
@@ -38,7 +41,7 @@ class Leaderboard extends Component
 
             $topAthleteBestPoints = $subQuery->groupBy('athlete_id')
                 ->orderByDesc('best_points')
-                ->limit(500) 
+                ->limit(500)
                 ->get();
 
             if ($topAthleteBestPoints->isEmpty()) {
@@ -51,7 +54,7 @@ class Leaderboard extends Component
                         ->where('athlete_id', $best->athlete_id)
                         ->where('iaaf_points', $best->best_points)
                         ->first();
-                    
+
                     if ($bestResult) {
                         $finalResults->push($bestResult);
                     }

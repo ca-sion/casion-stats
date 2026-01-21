@@ -27,10 +27,14 @@ class AthleteResource extends JsonResource
             ],
             'personal_bests' => PersonalBestResource::collection(
                 $this->when($this->relationLoaded('personalBests'), function () {
-                    if (!$this->personalBests) return [];
+                    if (! $this->personalBests) {
+                        return [];
+                    }
+
                     return $this->personalBests->groupBy('discipline_id')->map(function ($disciplineResults) {
                         $discipline = $disciplineResults->first()?->discipline;
                         $descending = strtolower($discipline?->sorting ?? 'asc') === 'desc';
+
                         return $disciplineResults->sortBy('performance_normalized', SORT_REGULAR, $descending)->first();
                     })->filter()->values();
                 })

@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Carbon\CarbonInterface;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Athlete extends Model
 {
@@ -61,12 +61,15 @@ class Athlete extends Model
     {
         return Attribute::make(
             get: function () {
-                if (!$this->birthdate || !$this->birthdate instanceof CarbonInterface) return null;
+                if (! $this->birthdate || ! $this->birthdate instanceof CarbonInterface) {
+                    return null;
+                }
                 $age = now()->year - $this->birthdate->year;
+
                 return AthleteCategory::where('genre', $this->genre)
-                    ->where(function($q) use ($age) {
+                    ->where(function ($q) use ($age) {
                         $q->where('age_limit', '>=', $age)
-                          ->orWhere('age_limit', 99);
+                            ->orWhere('age_limit', 99);
                     })
                     ->orderBy('age_limit', 'asc')
                     ->first();
@@ -82,6 +85,7 @@ class Athlete extends Model
         return Attribute::make(
             get: function () {
                 $minDate = $this->results()->with('event')->get()->min('event.date');
+
                 return $minDate instanceof CarbonInterface ? $minDate->year : null;
             }
         );
@@ -95,6 +99,7 @@ class Athlete extends Model
         return Attribute::make(
             get: function () {
                 $maxDate = $this->results()->with('event')->get()->max('event.date');
+
                 return $maxDate instanceof CarbonInterface ? $maxDate->year : null;
             }
         );
@@ -108,42 +113,44 @@ class Athlete extends Model
         $allCategories = AthleteCategory::orderBy('age_limit')->get();
         $categoryNames = array_map('trim', $categoryNames);
 
-        $query->where(function($q) use ($categoryNames, $allCategories) {
+        $query->where(function ($q) use ($categoryNames, $allCategories) {
             $hasCondition = false;
 
             foreach ($categoryNames as $name) {
                 // 1. Try exact match
-                $category = $allCategories->first(fn($c) => strcasecmp($c->name, $name) === 0);
-                
+                $category = $allCategories->first(fn ($c) => strcasecmp($c->name, $name) === 0);
+
                 // 2. Fallback: try adding space (e.g. "U16M" -> "U16 M")
-                if (!$category && preg_match('/^([A-Z0-9]+)([MW])$/i', $name, $m)) {
-                     $category = $allCategories->first(fn($c) => strcasecmp($c->name, $m[1] . ' ' . $m[2]) === 0);
+                if (! $category && preg_match('/^([A-Z0-9]+)([MW])$/i', $name, $m)) {
+                    $category = $allCategories->first(fn ($c) => strcasecmp($c->name, $m[1].' '.$m[2]) === 0);
                 }
-                
-                if (!$category) continue;
-                
+
+                if (! $category) {
+                    continue;
+                }
+
                 // Find immediate lower category to define the range
                 $lowerCategory = $allCategories->where('genre', $category->genre)
                     ->where('age_limit', '<', $category->age_limit)
                     ->sortByDesc('age_limit')
                     ->first();
-                    
+
                 $minAge = $lowerCategory ? $lowerCategory->age_limit + 1 : 0;
                 $maxAge = $category->age_limit;
-                
+
                 $currentYear = now()->year;
                 $minBirthYear = $currentYear - $maxAge;
                 $maxBirthYear = $currentYear - $minAge;
-                
-                $q->orWhere(function($sub) use ($category, $minBirthYear, $maxBirthYear) {
+
+                $q->orWhere(function ($sub) use ($category, $minBirthYear, $maxBirthYear) {
                     $sub->where('genre', $category->genre)
                         ->whereYear('birthdate', '>=', $minBirthYear)
                         ->whereYear('birthdate', '<=', $maxBirthYear);
                 });
                 $hasCondition = true;
             }
-            
-            if (!$hasCondition) {
+
+            if (! $hasCondition) {
                 $q->whereRaw('1 = 0');
             }
         });

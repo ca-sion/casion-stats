@@ -5,25 +5,30 @@ namespace App\Livewire;
 use App\Services\QualificationService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Http;
 
 class CheckQualifications extends Component
 {
     use WithFileUploads;
 
     public $limitsFile;
+
     public $sourceType = 'files'; // 'files' or 'urls'
+
     public $resultFiles = [];
+
     public $resultUrls = '';
-    
+
     public $results = null;
+
     public $stats = null;
+
     public $errorMsg = null;
+
     public $isLoading = false;
 
     public function downloadExample($filename)
     {
-        $path = base_path('resources/data/' . $filename);
+        $path = base_path('resources/data/'.$filename);
         if (file_exists($path)) {
             return response()->download($path);
         }
@@ -68,7 +73,7 @@ class CheckQualifications extends Component
 
             // 3. Service Call
             $output = $service->check($limitsJson, $filesToPass, $urlsToPass);
-            
+
             $this->results = $output['data'];
             $this->stats = $output['stats'];
 

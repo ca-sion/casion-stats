@@ -29,8 +29,9 @@ class PopulateDisciplineData extends Command
     {
         $path = resource_path('data/wa_disciplines.json');
 
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             $this->error("File not found at: {$path}");
+
             return 1;
         }
 
@@ -38,11 +39,12 @@ class PopulateDisciplineData extends Command
         $data = json_decode($json, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->error("Invalid JSON format: " . json_last_error_msg());
+            $this->error('Invalid JSON format: '.json_last_error_msg());
+
             return 1;
         }
 
-        $this->info("Starting population of " . count($data) . " disciplines...");
+        $this->info('Starting population of '.count($data).' disciplines...');
 
         $updatedCount = 0;
         $notFoundCount = 0;
@@ -55,7 +57,9 @@ class PopulateDisciplineData extends Command
             $jsonName = $entry['name'] ?? null;
             $normalizedJsonName = $this->normalize($jsonName ?? '');
 
-            if (!$normalizedJsonName) continue;
+            if (! $normalizedJsonName) {
+                continue;
+            }
 
             // 1. Try strategy: Find by seltec_id (lanet_id)
             $discipline = null;
@@ -64,7 +68,7 @@ class PopulateDisciplineData extends Command
             }
 
             // 2. Try strategy: Exact match on normalized names (FR, DE, EN)
-            if (!$discipline) {
+            if (! $discipline) {
                 $discipline = $disciplines->first(function ($d) use ($normalizedJsonName) {
                     return $this->normalize($d->name_fr ?? '') === $normalizedJsonName ||
                            $this->normalize($d->name_de ?? '') === $normalizedJsonName ||
@@ -73,9 +77,10 @@ class PopulateDisciplineData extends Command
             }
 
             // 3. Try strategy: JSON name is part of DB name (e.g., "Suédois" vs "Relais suédois")
-            if (!$discipline) {
+            if (! $discipline) {
                 $discipline = $disciplines->first(function ($d) use ($normalizedJsonName) {
                     $normFr = $this->normalize($d->name_fr ?? '');
+
                     return str_contains($normFr, $normalizedJsonName);
                 });
             }
@@ -87,7 +92,7 @@ class PopulateDisciplineData extends Command
                     'seltec_id' => $lanetId ?? $discipline->seltec_id,
                     'seltec_code' => $entry['seltec_code'] ?? $discipline->seltec_code,
                     'code' => $entry['code'] ?? $discipline->code,
-                    'has_wind' => (bool)($entry['wind'] ?? $discipline->has_wind),
+                    'has_wind' => (bool) ($entry['wind'] ?? $discipline->has_wind),
                 ]);
                 $updatedCount++;
             } else {
@@ -96,7 +101,7 @@ class PopulateDisciplineData extends Command
             }
         }
 
-        $this->info("Completed!");
+        $this->info('Completed!');
         $this->info("Updated: {$updatedCount}");
         $this->info("Not found in database: {$notFoundCount}");
 
@@ -110,15 +115,15 @@ class PopulateDisciplineData extends Command
         $string = str_replace(['mètres', 'meter', 'mètre'], 'm', $string);
         $string = str_replace('walk', 'marche', $string);
         $string = str_replace(' ', '', $string);
-        
+
         // Remove accents
         if (function_exists('iconv')) {
             $string = @iconv('UTF-8', 'ASCII//TRANSLIT', $string);
         }
-        
+
         // Remove non-alphanumeric
-        $string = preg_replace('/[^a-z0-9]/', '', (string)$string);
-        
+        $string = preg_replace('/[^a-z0-9]/', '', (string) $string);
+
         return $string;
     }
 }

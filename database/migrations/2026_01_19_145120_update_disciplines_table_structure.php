@@ -38,7 +38,7 @@ return new class extends Migration
                 'seltec_code',
                 'has_wind',
                 'type',
-                'is_relay'
+                'is_relay',
             ]);
             $table->renameColumn('name_fr', 'name');
         });

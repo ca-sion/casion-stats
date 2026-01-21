@@ -31,30 +31,33 @@ class MergeDisciplines extends Command
         $fromIds = array_filter(explode(',', $this->option('from')));
         $toId = $this->option('to');
 
-        if (empty($fromIds) || !$toId) {
+        if (empty($fromIds) || ! $toId) {
             $this->error('Please specify --from (IDs) and --to (Target ID).');
+
             return 1;
         }
 
         $target = \App\Models\Discipline::find($toId);
-        if (!$target) {
+        if (! $target) {
             $this->error("Target discipline with ID {$toId} not found.");
+
             return 1;
         }
 
         $sources = \App\Models\Discipline::whereIn('id', $fromIds)->get();
         if ($sources->isEmpty()) {
-            $this->error("No source disciplines found for the provided IDs.");
+            $this->error('No source disciplines found for the provided IDs.');
+
             return 1;
         }
 
-        $this->info("Merging " . $sources->count() . " disciplines into '{$target->name_fr}' (ID: {$target->id})");
+        $this->info('Merging '.$sources->count()." disciplines into '{$target->name_fr}' (ID: {$target->id})");
 
         foreach ($sources as $source) {
             $this->line("- Source: {$source->name_fr} (ID: {$source->id})");
         }
 
-        if (!$this->option('force') && !$this->confirm('Do you wish to continue?', false)) {
+        if (! $this->option('force') && ! $this->confirm('Do you wish to continue?', false)) {
             return 0;
         }
 
@@ -66,15 +69,16 @@ class MergeDisciplines extends Command
             $this->info("Reassigned {$updatedCount} results.");
 
             // Reassign events (if any events are directly linked to disciplines - checking models)
-            // Based on earlier list_dir, events exist but usually link to results. 
+            // Based on earlier list_dir, events exist but usually link to results.
             // Result.php shows belongsTo(Discipline), let's check Event.php just in case.
 
             // Delete sources
             \App\Models\Discipline::whereIn('id', $fromIds)->delete();
-            $this->info("Deleted " . count($fromIds) . " source disciplines.");
+            $this->info('Deleted '.count($fromIds).' source disciplines.');
         });
 
         $this->info('Migration completed successfully.');
+
         return 0;
     }
 }

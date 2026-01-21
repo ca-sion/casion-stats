@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\IaafPointsService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasIaafPoints
 {

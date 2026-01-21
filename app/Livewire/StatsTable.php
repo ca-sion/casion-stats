@@ -5,8 +5,8 @@ namespace App\Livewire;
 use App\Models\AthleteCategory;
 use App\Models\Discipline;
 use App\Models\Result;
-use Livewire\Component;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class StatsTable extends Component
 {
@@ -20,7 +20,9 @@ class StatsTable extends Component
     public $genre = null;
 
     public $fix = false;
+
     public $showOnlyErrors = false;
+
     public $showSql = false;
 
     #[Url(as: 'inc')]
@@ -39,30 +41,30 @@ class StatsTable extends Component
 
     public function updatedFix($value)
     {
-        session()->put('fix', (bool)$value);
+        session()->put('fix', (bool) $value);
     }
 
     public function updatedShowOnlyErrors($value)
     {
-        session()->put('showOnlyErrors', (bool)$value);
+        session()->put('showOnlyErrors', (bool) $value);
     }
 
     public function toggleSql()
     {
-        $this->showSql = !$this->showSql;
+        $this->showSql = ! $this->showSql;
     }
 
     protected function ensureCanFix()
     {
-        if (!app()->isLocal()) {
-            abort(403, "Action autorisée uniquement en environnement local.");
+        if (! app()->isLocal()) {
+            abort(403, 'Action autorisée uniquement en environnement local.');
         }
     }
 
     public function syncAthleteGenre($athleteId, $correctGenre)
     {
         $this->ensureCanFix();
-        
+
         $athlete = \App\Models\Athlete::findOrFail($athleteId);
         $athlete->update(['genre' => $correctGenre]);
     }
@@ -70,7 +72,7 @@ class StatsTable extends Component
     public function deleteResult($resultId)
     {
         $this->ensureCanFix();
-        
+
         $result = \App\Models\Result::findOrFail($resultId);
         $result->delete();
     }
@@ -78,7 +80,7 @@ class StatsTable extends Component
     public function changeCategory($resultId, $categoryId)
     {
         $this->ensureCanFix();
-        
+
         $result = \App\Models\Result::findOrFail($resultId);
         $result->update(['athlete_category_id' => $categoryId]);
     }
@@ -86,7 +88,7 @@ class StatsTable extends Component
     public function updatePerformance($resultId, $performance)
     {
         $this->ensureCanFix();
-        
+
         $result = \App\Models\Result::findOrFail($resultId);
         $result->update(['performance' => $performance]);
     }
@@ -104,7 +106,7 @@ class StatsTable extends Component
 
             foreach ($result->diagnostics as $diagnostic) {
                 // Only process types that were selected (or all if none specified)
-                if (!empty($fixTypes) && !in_array($diagnostic['type'], $fixTypes)) {
+                if (! empty($fixTypes) && ! in_array($diagnostic['type'], $fixTypes)) {
                     continue;
                 }
 
@@ -137,13 +139,13 @@ class StatsTable extends Component
             ->forGenre($this->genre)
             ->orderedByPerformance($discipline->sorting ?? 'asc');
 
-        // On récupère les résultats sans limite SQL trop restrictive pour garantir un vrai Top 100 
+        // On récupère les résultats sans limite SQL trop restrictive pour garantir un vrai Top 100
         // après le filtre unique('athlete_id') en PHP.
         // On limite à 5000 pour éviter des problèmes de mémoire si la base est énorme.
         $results = $query->limit(5000)->get();
 
         // If not in fix mode, we only want the best result per athlete (vraie limite Top 100)
-        if (!$this->fix) {
+        if (! $this->fix) {
             $results = $results->unique('athlete_id')->take(100);
         }
 
@@ -167,13 +169,13 @@ class StatsTable extends Component
         foreach ($results as $result) {
             $diagnostics = $result->getDiagnostics();
             $result->diagnostics = $diagnostics;
-            
-            if (!empty($diagnostics)) {
+
+            if (! empty($diagnostics)) {
                 $errorCount++;
                 foreach ($diagnostics as $d) {
                     if (isset($fixSummary[$d['type']])) {
                         // Only count if it's actually auto-fixable
-                        if ($d['type'] === 'age_mismatch' && !isset($d['suggested_category_id'])) {
+                        if ($d['type'] === 'age_mismatch' && ! isset($d['suggested_category_id'])) {
                             continue;
                         }
                         $fixSummary[$d['type']]++;
@@ -184,14 +186,14 @@ class StatsTable extends Component
 
         // After calculating diagnostics, if showOnlyErrors is true, we filter them
         if ($this->fix && $this->showOnlyErrors) {
-            $results = $results->filter(fn($r) => !empty($r->diagnostics));
+            $results = $results->filter(fn ($r) => ! empty($r->diagnostics));
         }
-        
+
         // Re-apply unique AFTER diagnostics if in fix mode but user still wants unique athletes?
         // Usually, in fix mode, we might want to see all errors.
         // But the user complained about duplicates of athletes, so let's keep it clean.
-        if ($this->fix && !$this->showOnlyErrors) {
-             $results = $results->unique('athlete_id');
+        if ($this->fix && ! $this->showOnlyErrors) {
+            $results = $results->unique('athlete_id');
         }
 
         return view('livewire.stats-table', [

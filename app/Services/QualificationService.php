@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\AthleteCategory;
 use App\Models\Result;
 use App\Support\PerformanceNormalizer;
 use Illuminate\Support\Collection;
@@ -17,18 +16,17 @@ class QualificationService
     /**
      * Check qualifications against limits.
      *
-     * @param array $limitsJson The decoded JSON limits file.
-     * @param array $files Paths to HTML files or UploadedFile objects.
-     * @param array $urls URLs to fetch.
-     * @param string $clubFilter Club name to filter by (default 'CA Sion').
-     * @param array $htmlStrings Raw HTML strings to parse.
-     * @return array
+     * @param  array  $limitsJson  The decoded JSON limits file.
+     * @param  array  $files  Paths to HTML files or UploadedFile objects.
+     * @param  array  $urls  URLs to fetch.
+     * @param  string  $clubFilter  Club name to filter by (default 'CA Sion').
+     * @param  array  $htmlStrings  Raw HTML strings to parse.
      */
     public function check(array $limitsJson, array $files = [], array $urls = [], string $clubFilter = 'CA Sion', array $htmlStrings = []): array
     {
         $limitDisciplines = collect($limitsJson['disciplines']);
         $triggerDisciplines = $limitDisciplines
-            ->filter(fn($d) => !empty($d['qualifies_for']))
+            ->filter(fn ($d) => ! empty($d['qualifies_for']))
             ->pluck('discipline')
             ->toArray();
         $years = $limitsJson['years'] ?? [now()->year];
@@ -54,7 +52,7 @@ class QualificationService
             }
         }
 
-         // D. From Raw Strings
+        // D. From Raw Strings
         foreach ($htmlStrings as $html) {
             $rawResults = $rawResults->merge($this->parseHtml($html, 'String', $clubFilter));
         }
@@ -67,43 +65,53 @@ class QualificationService
             // A. Match ALL Disciplines that might fit
             // e.g. "50m haies" might match "50mH (84.0)" AND "50mH (91.4)"
             $limitConfigs = $this->matchDisciplines($result['discipline_raw'], $limitDisciplines);
-            
-            if ($limitConfigs->isEmpty()) continue;
+
+            if ($limitConfigs->isEmpty()) {
+                continue;
+            }
 
             $analyzedCount++;
 
             foreach ($limitConfigs as $limitConfig) {
                 // B. Determine Category & Limit
                 $targetCategory = $this->determineCategory($result, $limitConfig['categories'] ?? []);
-                
+
                 $limitValue = null;
                 if ($targetCategory) {
                     $limitValue = $limitConfig['categories'][$targetCategory] ?? null;
                 }
-                
+
                 // Gender specific global limits (global_M, global_W)
-                if (!$limitValue) {
-                    $genderKey = "global_" . $result['gender']; // global_M or global_W
+                if (! $limitValue) {
+                    $genderKey = 'global_'.$result['gender']; // global_M or global_W
                     $limitValue = $limitConfig[$genderKey] ?? null;
-                    if ($limitValue) $targetCategory = 'Global ' . $result['gender'];
+                    if ($limitValue) {
+                        $targetCategory = 'Global '.$result['gender'];
+                    }
                 }
 
                 // Fallback to absolute global limit
-                if (!$limitValue) {
+                if (! $limitValue) {
                     $limitValue = $limitConfig['global_limit'] ?? null;
-                    if ($limitValue) $targetCategory = 'Global';
+                    if ($limitValue) {
+                        $targetCategory = 'Global';
+                    }
                 }
 
-                if (!$limitValue) continue; 
+                if (! $limitValue) {
+                    continue;
+                }
 
                 // C. Compare Performance
                 $limitSeconds = $this->parsePerformanceToSeconds($limitValue);
                 $perfSeconds = $result['performance_seconds'];
 
-                if ($limitSeconds === null || $perfSeconds === null) continue;
+                if ($limitSeconds === null || $perfSeconds === null) {
+                    continue;
+                }
 
                 $isField = $this->isFieldEvent($limitConfig['discipline']);
-                
+
                 // Qualify?
                 $qualifiedBool = $isField ? ($perfSeconds >= $limitSeconds) : ($perfSeconds <= $limitSeconds);
 
@@ -116,7 +124,7 @@ class QualificationService
                         'status' => 'qualified',
                         'diff_percent' => 0,
                         'limit_hit_discipline' => $limitConfig['discipline'],
-                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines)
+                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines),
                     ]);
 
                     $qualified->push($baseResult);
@@ -133,7 +141,7 @@ class QualificationService
                             $qualified->push($secondaryResult);
                         }
                     }
-                    break; 
+                    break;
                 }
 
                 // Near Miss? (+/- 5%)
@@ -145,11 +153,15 @@ class QualificationService
                     if ($isField) {
                         // Field: % of limit reached (e.g. 5.80 / 6.00 = 96.6%)
                         $diffPercent = ($perfSeconds / $limitSeconds) * 100;
-                        if ($perfSeconds >= $limitSeconds * (1 - $margin)) $isNearMiss = true;
+                        if ($perfSeconds >= $limitSeconds * (1 - $margin)) {
+                            $isNearMiss = true;
+                        }
                     } else {
                         // Track: % of limit (e.g. 10.30 / 10.00 = 103%)
                         $diffPercent = ($perfSeconds / $limitSeconds) * 100;
-                        if ($perfSeconds <= $limitSeconds * (1 + $margin)) $isNearMiss = true;
+                        if ($perfSeconds <= $limitSeconds * (1 + $margin)) {
+                            $isNearMiss = true;
+                        }
                     }
                 }
 
@@ -162,7 +174,7 @@ class QualificationService
                         'status' => 'near_miss',
                         'diff_percent' => round($diffPercent, 1),
                         'limit_hit_discipline' => $limitConfig['discipline'],
-                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines)
+                        'has_qualifies_for' => in_array($limitConfig['discipline'], $triggerDisciplines),
                     ]));
                     // Don't break, keep looking for full qualification
                 }
@@ -173,7 +185,8 @@ class QualificationService
         // Grouping by athlete + target discipline + source discipline (direct or secondary source)
         $uniqueQualified = $qualified->groupBy(function ($item) {
             $sourceKey = $item['via_secondary'] ?? 'direct';
-            return Str::slug($item['athlete_name']) . '|' . $item['discipline_matched'] . '|' . $sourceKey;
+
+            return Str::slug($item['athlete_name']).'|'.$item['discipline_matched'].'|'.$sourceKey;
         })->map(function ($group) {
             $disc = $group->first()['discipline_matched'];
             $isField = $this->isFieldEvent($disc);
@@ -185,6 +198,7 @@ class QualificationService
             if ($isField) {
                 return $filtered->sortByDesc('performance_seconds')->first();
             }
+
             return $filtered->sortBy('performance_seconds')->first();
         });
 
@@ -210,17 +224,18 @@ class QualificationService
                     if ($targetCat) {
                         $limitValue = $primaryLimitDict['categories'][$targetCat] ?? null;
                     }
-                    if (!$limitValue) {
-                        $genderKey = "global_" . $res['gender'];
+                    if (! $limitValue) {
+                        $genderKey = 'global_'.$res['gender'];
                         $limitValue = $primaryLimitDict[$genderKey] ?? ($primaryLimitDict['global_limit'] ?? null);
                     }
                     $res['primary_limit'] = $limitValue;
                 }
-                
+
                 // Keep secondary info for display
                 $res['secondary_perf'] = $res['performance_display'];
                 $res['secondary_limit'] = $res['limit_hit'];
             }
+
             return $res;
         });
 
@@ -231,7 +246,7 @@ class QualificationService
                 'analyzed' => $analyzedCount,
                 'qualified' => $finalData->where('status', 'qualified')->count(),
                 'near_miss' => $finalData->where('status', 'near_miss')->count(),
-            ]
+            ],
         ];
     }
 
@@ -252,7 +267,7 @@ class QualificationService
                 // DB source
                 return [
                     'source' => 'DB',
-                    'athlete_name' => $r->athlete->last_name . ' ' . $r->athlete->first_name,
+                    'athlete_name' => $r->athlete->last_name.' '.$r->athlete->first_name,
                     'birth_year' => $r->athlete->birthdate->year,
                     'gender' => strtoupper($r->athlete->genre), // 'M' or 'W'
                     'category_db' => $r->athleteCategory->name ?? null,
@@ -271,9 +286,11 @@ class QualificationService
     {
         try {
             $resp = Http::withHeaders(['User-Agent' => 'Mozilla/5.0'])->get($url);
+
             return $resp->successful() ? $resp->body() : null;
         } catch (\Exception $e) {
-            Log::error("Fetch error $url: " . $e->getMessage());
+            Log::error("Fetch error $url: ".$e->getMessage());
+
             return null;
         }
     }
@@ -305,12 +322,14 @@ class QualificationService
 
             foreach ($entries as $entry) {
                 // Filter by Club
-                if ($clubFilter && !str_contains($entry, $clubFilter)) continue;
+                if ($clubFilter && ! str_contains($entry, $clubFilter)) {
+                    continue;
+                }
 
                 $name = $this->extractRegex('/class="col-2".*?class="firstline">\s*(.*?)\s*<\/div>/s', $entry);
                 $year = $this->extractRegex('/class="col-3".*?class="secondline">\s*(.*?)\s*<\/div>/s', $entry);
                 $catRaw = $this->extractRegex('/class="col-4".*?class="firstline">\s*(.*?)\s*<\/div>/s', $entry, true); // Use all matches for category? No, col-4 firstline is usually Perf. Wait.
-                
+
                 // Correction on Regex based on debug:
                 // Perf is in col-4 firstline.
                 // Cat is... where?
@@ -319,7 +338,7 @@ class QualificationService
                 // Actually there are MULTIPLE col-4s.
                 // 1st col-4: Result (8,45)
                 // 2nd col-4: Category (U16M)
-                
+
                 // Let's grab all col-4 contents
                 preg_match_all('/class="col-4".*?class="firstline">\s*(.*?)\s*<\/div>/s', $entry, $col4Matches);
                 $perfRaw = $col4Matches[1][0] ?? 'DNS';
@@ -328,12 +347,14 @@ class QualificationService
                 $perfRaw = str_replace(',', '.', trim($perfRaw));
                 $perfSeconds = $this->parsePerformanceToSeconds($perfRaw);
 
-                if ($perfSeconds === null) continue;
+                if ($perfSeconds === null) {
+                    continue;
+                }
 
                 $results->push([
                     'source' => $sourceLabel,
                     'athlete_name' => trim($name),
-                    'birth_year' => (int)trim($year),
+                    'birth_year' => (int) trim($year),
                     'gender' => $this->guessGender($catRaw), // Heuristic
                     'category_db' => trim($catRaw), // Raw category from HTML
                     'discipline_raw' => trim($discipline),
@@ -346,6 +367,7 @@ class QualificationService
                 ]);
             }
         }
+
         return $results;
     }
 
@@ -357,7 +379,7 @@ class QualificationService
 
         // Strategy: Find ALL JSON Limit Keys that are contained in the Raw Name (or vice versa)
         // because we don't know which variant applies (e.g. 84.0 vs 91.4).
-        
+
         $matches = collect();
 
         foreach ($limitDisciplines as $limit) {
@@ -369,7 +391,7 @@ class QualificationService
                 $matches->push($limit);
             }
         }
-        
+
         return $matches;
     }
 
@@ -377,7 +399,9 @@ class QualificationService
     {
         // 1. Try mapping the Raw Category directly (e.g. "U16M" -> "U16M")
         $rawCat = strtoupper(str_replace(' ', '', $result['category_db'])); // "U16 M" -> "U16M"
-        if (isset($categoriesMap[$rawCat])) return $rawCat;
+        if (isset($categoriesMap[$rawCat])) {
+            return $rawCat;
+        }
 
         // 2. If no direct match, calculate from Birth Year
         // (This handles "U16 M15" or cases where HTML cat is weird)
@@ -390,9 +414,11 @@ class QualificationService
             // Let's iterate keys in $categoriesMap to find one that fits.
             // But JSON keys don't have age limits defined in them implicitly (except U16).
             // Better to rely on standard Swiss rules or specific helper.
-            
+
             $catName = $this->getCategoryNameFromAge($age, $gender);
-            if (isset($categoriesMap[$catName])) return $catName;
+            if (isset($categoriesMap[$catName])) {
+                return $catName;
+            }
         }
 
         return null;
@@ -405,12 +431,13 @@ class QualificationService
         $str = strtolower($str);
         // Remove content in parenthesis (e.g. weights, heights)
         $str = preg_replace('/\(.*?\)/', '', $str);
-        
+
         $str = str_replace(
-            ['haies', 'hurdles', 'mètres', 'metres', ' '], 
-            ['h', 'h', 'm', 'm', ''], 
+            ['haies', 'hurdles', 'mètres', 'metres', ' '],
+            ['h', 'h', 'm', 'm', ''],
             $str
         );
+
         // Remove dots left over?
         return str_replace(['.', ','], '', $str);
     }
@@ -420,12 +447,16 @@ class QualificationService
         if (preg_match($pattern, $subject, $m)) {
             return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
+
         return '';
     }
 
     private function guessGender($catRaw)
     {
-        if (str_contains($catRaw, 'W') || str_contains($catRaw, 'F') || str_contains($catRaw, 'Femmes')) return 'W';
+        if (str_contains($catRaw, 'W') || str_contains($catRaw, 'F') || str_contains($catRaw, 'Femmes')) {
+            return 'W';
+        }
+
         return 'M';
     }
 
@@ -433,15 +464,29 @@ class QualificationService
     {
         $suffix = ($gender === 'M') ? 'M' : 'W'; // Match JSON "M"/"W" or "MAN"/"WOM"?
         // JSON uses "U16M", "MAN", "WOM".
-        
-        if ($age < 10) return "U10$suffix";
-        if ($age < 12) return "U12$suffix";
-        if ($age < 14) return "U14$suffix";
-        if ($age < 16) return "U16$suffix";
-        if ($age < 18) return "U18$suffix";
-        if ($age < 20) return "U20$suffix";
-        if ($age < 23) return "U23$suffix";
-        
+
+        if ($age < 10) {
+            return "U10$suffix";
+        }
+        if ($age < 12) {
+            return "U12$suffix";
+        }
+        if ($age < 14) {
+            return "U14$suffix";
+        }
+        if ($age < 16) {
+            return "U16$suffix";
+        }
+        if ($age < 18) {
+            return "U18$suffix";
+        }
+        if ($age < 20) {
+            return "U20$suffix";
+        }
+        if ($age < 23) {
+            return "U23$suffix";
+        }
+
         return ($gender === 'M') ? 'MAN' : 'WOM';
     }
 
@@ -449,8 +494,11 @@ class QualificationService
     {
         $fields = ['hauteur', 'perche', 'longueur', 'triple', 'poids', 'disque', 'marteau', 'javelot', 'balle', 'jump', 'throw', 'shot', 'disk', 'hammer', 'speer', 'kugel', 'hoch', 'stab', 'weit'];
         foreach ($fields as $f) {
-            if (str_contains(strtolower($discName), $f)) return true;
+            if (str_contains(strtolower($discName), $f)) {
+                return true;
+            }
         }
+
         return false;
     }
 }

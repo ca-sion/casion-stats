@@ -9,6 +9,7 @@ use Livewire\Component;
 class DeduplicateEvents extends Component
 {
     public $clusters = [];
+
     public $scanComplete = false;
 
     protected $service;
@@ -29,7 +30,7 @@ class DeduplicateEvents extends Component
     {
         set_time_limit(120);
         $rawClusters = $this->service->findDuplicates();
-        
+
         $this->clusters = $rawClusters->map(function ($cluster) {
             return collect($cluster)->map(function ($event) {
                 return [
@@ -53,7 +54,7 @@ class DeduplicateEvents extends Component
 
         if ($primary && $secondary) {
             $this->service->mergeEvents($primary, $secondary);
-            
+
             // Remove the merged event from the cluster in the UI
             $this->clusters[$clusterIndex] = array_filter($this->clusters[$clusterIndex], function ($event) use ($secondaryId) {
                 return $event['id'] !== $secondaryId;

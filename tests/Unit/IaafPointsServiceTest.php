@@ -2,14 +2,14 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
-use App\Services\IaafPointsService;
+use App\Models\AthleteCategory;
 use App\Models\Discipline;
 use App\Models\Result;
-use App\Models\AthleteCategory;
+use App\Services\IaafPointsService;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 class IaafPointsServiceTest extends TestCase
 {
@@ -20,7 +20,7 @@ class IaafPointsServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new IaafPointsService();
+        $this->service = new IaafPointsService;
     }
 
     #[DataProvider('mappingProvider')]
@@ -52,7 +52,7 @@ class IaafPointsServiceTest extends TestCase
     public function test_calculates_points_correctly()
     {
         // 100m Men, 10.00s should be ~1096 points (2022 table)
-        
+
         $discipline = Mockery::mock(Discipline::class);
         $discipline->shouldReceive('getAttribute')->with('wa_code')->andReturn('100');
         $discipline->shouldReceive('getAttribute')->with('code')->andReturn(null);
@@ -64,20 +64,20 @@ class IaafPointsServiceTest extends TestCase
         $category->shouldReceive('offsetExists')->andReturn(true);
 
         $result = Mockery::mock(Result::class);
-        
+
         // Mocking the attributes accessed in the service
         $result->shouldReceive('getAttribute')->with('id')->andReturn(1);
         $result->shouldReceive('getAttribute')->with('discipline')->andReturn($discipline);
         $result->shouldReceive('getAttribute')->with('athleteCategory')->andReturn($category);
         $result->shouldReceive('getAttribute')->with('performance_normalized')->andReturn(10.00);
-        
+
         $result->shouldReceive('isDirty')->andReturn(false);
-        
+
         // Mocking offsetExists if called by Laravel/Mockery
         $result->shouldReceive('offsetExists')->andReturn(true);
 
         $points = $this->service->getPoints($result);
-        
+
         $this->assertEquals(1206, $points);
     }
 }

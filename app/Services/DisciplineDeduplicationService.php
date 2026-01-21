@@ -22,14 +22,18 @@ class DisciplineDeduplicationService
 
         for ($i = 0; $i < $count; $i++) {
             $a = $disciplines[$i];
-            if (in_array($a->id, $processedIds)) continue;
+            if (in_array($a->id, $processedIds)) {
+                continue;
+            }
 
             $cluster = [$a];
             $hasDuplicates = false;
 
             for ($j = $i + 1; $j < $count; $j++) {
                 $b = $disciplines[$j];
-                if (in_array($b->id, $processedIds)) continue;
+                if (in_array($b->id, $processedIds)) {
+                    continue;
+                }
 
                 if ($this->arePotentialDuplicates($a, $b)) {
                     $cluster[] = $b;
@@ -58,13 +62,13 @@ class DisciplineDeduplicationService
         $nameB_de = $this->normalize($b->name_de ?? '');
 
         // 1. Exact Match on normalized names
-        if (($nameA_fr !== '' && $nameA_fr === $nameB_fr) || 
+        if (($nameA_fr !== '' && $nameA_fr === $nameB_fr) ||
             ($nameA_de !== '' && $nameA_de === $nameB_de)) {
             return true;
         }
 
         // 2. Cross-language match (sometimes people put DE name in FR column or vice versa)
-        if (($nameA_fr !== '' && ($nameA_fr === $nameB_de)) || 
+        if (($nameA_fr !== '' && ($nameA_fr === $nameB_de)) ||
             ($nameA_de !== '' && ($nameA_de === $nameB_fr))) {
             return true;
         }
@@ -73,11 +77,15 @@ class DisciplineDeduplicationService
         if ($nameA_fr !== '' && $nameB_fr !== '') {
             $percent = 0;
             similar_text($nameA_fr, $nameB_fr, $percent);
-            if ($percent > 80) return true;
-            
+            if ($percent > 80) {
+                return true;
+            }
+
             // Special case for short names like "100m" vs "100 metres"
             if (str_starts_with($nameA_fr, $nameB_fr) || str_starts_with($nameB_fr, $nameA_fr)) {
-                if (strlen($nameA_fr) > 2 && strlen($nameB_fr) > 2) return true;
+                if (strlen($nameA_fr) > 2 && strlen($nameB_fr) > 2) {
+                    return true;
+                }
             }
         }
 
@@ -94,7 +102,7 @@ class DisciplineDeduplicationService
         $string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
         // Remove non-alphanumeric
         $string = preg_replace('/[^a-z0-9]/', '', $string);
-        
+
         return $string;
     }
 
@@ -108,16 +116,16 @@ class DisciplineDeduplicationService
         DB::transaction(function () use ($target, $sources, $sourceIds) {
             // Smart Merge: Fill non-null fields in target from sources
             $fields = [
-                'name_de', 'name_en', 'code', 'wa_code', 
-                'seltec_code', 'seltec_id', 'alabus_id', 
-                'has_wind', 'type', 'is_relay', 'order'
+                'name_de', 'name_en', 'code', 'wa_code',
+                'seltec_code', 'seltec_id', 'alabus_id',
+                'has_wind', 'type', 'is_relay', 'order',
             ];
 
             $updates = [];
             foreach ($fields as $field) {
                 if (empty($target->$field)) {
                     foreach ($sources as $source) {
-                        if (!empty($source->$field)) {
+                        if (! empty($source->$field)) {
                             $updates[$field] = $source->$field;
                             $target->$field = $source->$field; // Update local instance for subsequent fields or logic
                             break;
@@ -126,7 +134,7 @@ class DisciplineDeduplicationService
                 }
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $target->update($updates);
             }
 

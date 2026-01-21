@@ -18,7 +18,7 @@ class StatsTableTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        app()->detectEnvironment(fn() => 'local');
+        app()->detectEnvironment(fn () => 'local');
     }
 
     /**
@@ -62,7 +62,7 @@ class StatsTableTest extends TestCase
             'athlete_category_id' => $category->id,
             'discipline_id' => $discipline->id,
             'event_id' => $event->id,
-            'performance' => '10.50'
+            'performance' => '10.50',
         ]);
 
         Livewire::test(\App\Livewire\StatsTable::class, ['disciplineId' => $discipline->id])
@@ -85,7 +85,7 @@ class StatsTableTest extends TestCase
             'athlete_category_id' => $category->id,
             'discipline_id' => $discipline->id,
             'event_id' => $event->id,
-            'performance' => '10.50'
+            'performance' => '10.50',
         ]);
 
         Livewire::test(\App\Livewire\StatsTable::class, ['disciplineId' => $discipline->id])
@@ -104,7 +104,7 @@ class StatsTableTest extends TestCase
         $discipline = Discipline::factory()->create();
         $catU18 = AthleteCategory::factory()->create(['name' => 'U18 M', 'age_limit' => 17, 'genre' => 'm']);
         $catU16 = AthleteCategory::factory()->create(['name' => 'U16 M', 'age_limit' => 15, 'genre' => 'm']);
-        
+
         $athlete = Athlete::factory()->create(['birthdate' => now()->subYears(14)]); // 14 years old
         $event = Event::factory()->create(['date' => now()]);
 
@@ -133,7 +133,7 @@ class StatsTableTest extends TestCase
         $discipline = Discipline::factory()->create();
         $category = AthleteCategory::factory()->create();
         $event = Event::factory()->create();
-        
+
         // Create 110 results
         Result::factory()->count(110)->create([
             'discipline_id' => $discipline->id,
@@ -156,7 +156,7 @@ class StatsTableTest extends TestCase
         $category = AthleteCategory::factory()->create();
         $event = Event::factory()->create();
         $athlete = \App\Models\Athlete::factory()->create(['genre' => $category->genre]);
-        
+
         // Create 2 identical results
         $res1 = Result::create([
             'athlete_id' => $athlete->id,
@@ -183,6 +183,6 @@ class StatsTableTest extends TestCase
             ->call('bulkFix');
 
         $this->assertEquals(1, Result::count());
-        $this->assertEquals($res1->id, Result::first()->id, "The record with the lowest ID should be preserved.");
+        $this->assertEquals($res1->id, Result::first()->id, 'The record with the lowest ID should be preserved.');
     }
 }

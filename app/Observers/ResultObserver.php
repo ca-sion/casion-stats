@@ -19,7 +19,7 @@ class ResultObserver
         // 2. Calculate IAAF points if performance or discipline (or category/gender) changed
         // We check isDirty for fields affecting points or if points are missing.
         $affectsPoints = ['performance_normalized', 'discipline_id', 'athlete_category_id'];
-        
+
         if ($result->isDirty($affectsPoints) || $result->iaaf_points === null || $result->iaaf_points == 0) {
             $result->iaaf_points = $result->iaaf_points_calculated;
         }

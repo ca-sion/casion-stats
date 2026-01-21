@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AthleteResource;
 use App\Models\Athlete;
-use Illuminate\Http\Request;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -43,10 +42,10 @@ class AthleteController extends Controller
                 }),
             ])
             ->allowedIncludes([
-                'results', 
+                'results',
                 'personalBests',
-                'results.discipline', 
-                'results.event', 
+                'results.discipline',
+                'results.event',
                 'results.athleteCategory',
                 'personalBests.discipline',
                 'personalBests.event',
@@ -66,10 +65,10 @@ class AthleteController extends Controller
     {
         $athlete = QueryBuilder::for(Athlete::class)
             ->allowedIncludes([
-                'results', 
+                'results',
                 'personalBests',
-                'results.discipline', 
-                'results.event', 
+                'results.discipline',
+                'results.event',
                 'results.athleteCategory',
                 'personalBests.discipline',
                 'personalBests.event',

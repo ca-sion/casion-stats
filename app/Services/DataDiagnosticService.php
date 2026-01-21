@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Result;
 use App\Models\AthleteCategory;
-use Illuminate\Support\Facades\Log;
+use App\Models\Result;
 
 class DataDiagnosticService
 {
@@ -17,44 +16,47 @@ class DataDiagnosticService
         $issues = [];
 
         // Ensure relations are loaded
-        if (!$result->relationLoaded('athlete')) {
+        if (! $result->relationLoaded('athlete')) {
             $result->load('athlete');
         }
-        if (!$result->relationLoaded('athleteCategory')) {
+        if (! $result->relationLoaded('athleteCategory')) {
             $result->load('athleteCategory');
         }
-        if (!$result->relationLoaded('event')) {
+        if (! $result->relationLoaded('event')) {
             $result->load('event');
         }
 
         // 0. Check for missing relations
-        if (!$result->athlete) {
+        if (! $result->athlete) {
             $issues[] = [
                 'type' => 'missing_relation',
                 'label' => "Athlète manquant (ID: {$result->athlete_id})",
                 'severity' => 'error',
                 'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
             ];
+
             return $issues;
         }
 
-        if (!$result->athleteCategory) {
+        if (! $result->athleteCategory) {
             $issues[] = [
                 'type' => 'missing_relation',
                 'label' => "Catégorie manquante (ID: {$result->athlete_category_id})",
                 'severity' => 'error',
                 'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
             ];
+
             return $issues;
         }
 
-        if (!$result->event) {
+        if (! $result->event) {
             $issues[] = [
                 'type' => 'missing_relation',
                 'label' => "Événement manquant (ID: {$result->event_id})",
                 'severity' => 'error',
                 'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
             ];
+
             return $issues;
         }
 
@@ -72,10 +74,10 @@ class DataDiagnosticService
         $athleticAge = $result->event->date->year - $result->athlete->birthdate->year;
         $hasValidBirthdate = $result->athlete->birthdate->year > 1900;
 
-        if (!$hasValidBirthdate) {
+        if (! $hasValidBirthdate) {
             $issues[] = [
                 'type' => 'missing_birthdate',
-                'label' => "Date de naissance manquante",
+                'label' => 'Date de naissance manquante',
                 'severity' => 'warning',
                 'sql_fix' => "UPDATE athletes SET birthdate = 'YYYY-MM-DD' WHERE id = {$result->athlete->id};",
             ];
@@ -86,9 +88,9 @@ class DataDiagnosticService
             if ($isExactAge) {
                 if ($athleticAge != $result->athleteCategory->age_limit) {
                     $suggestedCategory = AthleteCategory::where('genre', $result->athlete->genre)
-                        ->where('name', 'LIKE', '% ' . ($athleticAge < 10 ? '0' : '') . $athleticAge)
+                        ->where('name', 'LIKE', '% '.($athleticAge < 10 ? '0' : '').$athleticAge)
                         ->get()
-                        ->sortBy(fn($cat) => preg_match('/\d{2}$/', $cat->name))
+                        ->sortBy(fn ($cat) => preg_match('/\d{2}$/', $cat->name))
                         ->first();
 
                     $issues[] = [
@@ -96,7 +98,7 @@ class DataDiagnosticService
                         'label' => "Âge ({$athleticAge} ans) ≠ {$result->athleteCategory->age_limit} attendu",
                         'severity' => 'warning',
                         'suggested_category_id' => $suggestedCategory?->id,
-                        'sql_fix' => $suggestedCategory 
+                        'sql_fix' => $suggestedCategory
                             ? "UPDATE results SET athlete_category_id = {$suggestedCategory->id} WHERE id = {$result->id};"
                             : null,
                     ];
@@ -108,10 +110,10 @@ class DataDiagnosticService
                         ->where('age_limit', '>=', $athleticAge)
                         ->orderBy('age_limit', 'asc')
                         ->get()
-                        ->sortBy(fn($cat) => preg_match('/\d{2}$/', $cat->name))
+                        ->sortBy(fn ($cat) => preg_match('/\d{2}$/', $cat->name))
                         ->first();
-                    
-                    if (!$suggestedCategory) {
+
+                    if (! $suggestedCategory) {
                         $suggestedCategory = AthleteCategory::where('genre', $result->athlete->genre)
                             ->where('age_limit', 99)
                             ->first();
@@ -122,7 +124,7 @@ class DataDiagnosticService
                         'label' => "Âge ({$athleticAge} ans) > Limite {$result->athleteCategory->age_limit}",
                         'severity' => 'warning',
                         'suggested_category_id' => $suggestedCategory?->id,
-                        'sql_fix' => $suggestedCategory 
+                        'sql_fix' => $suggestedCategory
                             ? "UPDATE results SET athlete_category_id = {$suggestedCategory->id} WHERE id = {$result->id};"
                             : null,
                     ];
@@ -131,7 +133,7 @@ class DataDiagnosticService
                         ->where('age_limit', '>=', $athleticAge)
                         ->where('age_limit', '<=', $result->athleteCategory->age_limit)
                         ->get()
-                        ->filter(fn($cat) => !preg_match('/\d{2}$/', $cat->name))
+                        ->filter(fn ($cat) => ! preg_match('/\d{2}$/', $cat->name))
                         ->sortBy('age_limit')
                         ->first();
 
@@ -167,8 +169,8 @@ class DataDiagnosticService
         }
 
         // 4. Performance format check
-        if (!preg_match('/^\d+([.:]\d+)*$/', $result->performance)) {
-             $issues[] = [
+        if (! preg_match('/^\d+([.:]\d+)*$/', $result->performance)) {
+            $issues[] = [
                 'type' => 'format_issue',
                 'label' => "Format performance suspect: '{$result->performance}'",
                 'severity' => 'info',

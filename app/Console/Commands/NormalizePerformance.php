@@ -33,7 +33,7 @@ class NormalizePerformance extends Command
         foreach ($results as $result) {
             // Triggering save will fire the ResultObserver@saving
             $result->save();
-            
+
             $bar->advance();
         }
 

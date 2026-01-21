@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Discipline;
 use App\Models\AthleteCategory;
+use App\Models\Discipline;
 use App\Models\Result;
 use GlaivePro\IaafPoints\IaafCalculator;
 
@@ -53,17 +53,17 @@ class IaafPointsService
     public function getPoints(Result $result): int
     {
         $discipline = $result->discipline;
-        if ($result->isDirty('discipline_id') || !$discipline) {
+        if ($result->isDirty('discipline_id') || ! $discipline) {
             $discipline = Discipline::find($result->discipline_id);
         }
 
         $category = $result->athleteCategory;
-        if ($result->isDirty('athlete_category_id') || !$category) {
+        if ($result->isDirty('athlete_category_id') || ! $category) {
             $category = AthleteCategory::find($result->athlete_category_id);
         }
 
         $iaafKey = $this->getIaafKey($discipline);
-        if (!$iaafKey) {
+        if (! $iaafKey) {
             return 0;
         }
 
@@ -71,12 +71,12 @@ class IaafPointsService
         if ($gender === 'w') {
             $gender = 'f';
         }
-        
+
         $venue = $this->getVenue($discipline);
 
         $calcKey = "{$iaafKey}_{$gender}_{$venue}";
 
-        if (!isset(static::$calculators[$calcKey])) {
+        if (! isset(static::$calculators[$calcKey])) {
             static::$calculators[$calcKey] = new IaafCalculator([
                 'discipline' => $iaafKey,
                 'gender' => $gender,
@@ -104,28 +104,66 @@ class IaafPointsService
 
         // 3. Fallback to some common transformations if no explicit mapping
         $name = strtolower($discipline->name_fr);
-        
-        if (str_contains($name, '100 m') && !str_contains($name, 'haies')) return '100m';
-        if (str_contains($name, '200 m') && !str_contains($name, 'haies')) return '200m';
-        if (str_contains($name, '400 m') && !str_contains($name, 'haies')) return '400m';
-        if (str_contains($name, '800 m')) return '800m';
-        if (str_contains($name, '1500 m')) return '1500m';
-        if (str_contains($name, '5000 m')) return '5000m';
-        if (str_contains($name, '10000 m')) return '10000m';
-        if (preg_match('/^50 ?m/', $name) && !str_contains($name, 'haies')) return '50m';
-        if (preg_match('/^60 ?m/', $name) && !str_contains($name, 'haies')) return '60m';
-        if (str_contains($name, '50 m haies')) return '50mh';
-        if (str_contains($name, '60 m haies')) return '60mh';
-        
+
+        if (str_contains($name, '100 m') && ! str_contains($name, 'haies')) {
+            return '100m';
+        }
+        if (str_contains($name, '200 m') && ! str_contains($name, 'haies')) {
+            return '200m';
+        }
+        if (str_contains($name, '400 m') && ! str_contains($name, 'haies')) {
+            return '400m';
+        }
+        if (str_contains($name, '800 m')) {
+            return '800m';
+        }
+        if (str_contains($name, '1500 m')) {
+            return '1500m';
+        }
+        if (str_contains($name, '5000 m')) {
+            return '5000m';
+        }
+        if (str_contains($name, '10000 m')) {
+            return '10000m';
+        }
+        if (preg_match('/^50 ?m/', $name) && ! str_contains($name, 'haies')) {
+            return '50m';
+        }
+        if (preg_match('/^60 ?m/', $name) && ! str_contains($name, 'haies')) {
+            return '60m';
+        }
+        if (str_contains($name, '50 m haies')) {
+            return '50mh';
+        }
+        if (str_contains($name, '60 m haies')) {
+            return '60mh';
+        }
+
         // Field events
-        if (str_contains($name, 'hauteur')) return 'high_jump';
-        if (str_contains($name, 'perche')) return 'pole_vault';
-        if (str_contains($name, 'longueur')) return 'long_jump';
-        if (str_contains($name, 'triple')) return 'triple_jump';
-        if (str_contains($name, 'poids')) return 'shot_put';
-        if (str_contains($name, 'disque')) return 'discus_throw';
-        if (str_contains($name, 'marteau')) return 'hammer_throw';
-        if (str_contains($name, 'javelot')) return 'javelin_throw';
+        if (str_contains($name, 'hauteur')) {
+            return 'high_jump';
+        }
+        if (str_contains($name, 'perche')) {
+            return 'pole_vault';
+        }
+        if (str_contains($name, 'longueur')) {
+            return 'long_jump';
+        }
+        if (str_contains($name, 'triple')) {
+            return 'triple_jump';
+        }
+        if (str_contains($name, 'poids')) {
+            return 'shot_put';
+        }
+        if (str_contains($name, 'disque')) {
+            return 'discus_throw';
+        }
+        if (str_contains($name, 'marteau')) {
+            return 'hammer_throw';
+        }
+        if (str_contains($name, 'javelot')) {
+            return 'javelin_throw';
+        }
 
         return null;
     }
