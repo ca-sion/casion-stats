@@ -93,12 +93,12 @@ HTML;
     expect($output['data'][0]['athlete_name'])->toBe('Global Jumper');
 });
 
-test('it identifies near misses within 5% margin', function () {
+test('it identifies near misses within 3% margin', function () {
     $limits = [
         'years' => [2026],
         'disciplines' => [
-            ['discipline' => '100m', 'categories' => ['U16M' => '10.00']], // Track: max 10.50
-            ['discipline' => 'Longueur', 'categories' => ['U16M' => '6.00']], // Field: min 5.70
+            ['discipline' => '100m', 'categories' => ['U16M' => '10.00']], // Track: max 10.30
+            ['discipline' => 'Longueur', 'categories' => ['U16M' => '6.00']], // Field: min 5.82
         ],
     ];
 
@@ -108,7 +108,7 @@ test('it identifies near misses within 5% margin', function () {
     <div class="entryline">
        <div class="col-2"><div class="firstline">Slow Runner</div></div>
        <div class="col-3"><div class="secondline">2011</div></div>
-       <div class="col-4"><div class="firstline">10.30</div></div>
+       <div class="col-4"><div class="firstline">10.20</div></div>
        <div class="col-4"><div class="firstline">U16M</div></div>
        <div class="col-last">CA Sion</div>
     </div>
@@ -118,7 +118,7 @@ test('it identifies near misses within 5% margin', function () {
     <div class="entryline">
        <div class="col-2"><div class="firstline">Short Jumper</div></div>
        <div class="col-3"><div class="secondline">2011</div></div>
-       <div class="col-4"><div class="firstline">5.80</div></div>
+       <div class="col-4"><div class="firstline">5.90</div></div>
        <div class="col-4"><div class="firstline">U16M</div></div>
        <div class="col-last">CA Sion</div>
     </div>

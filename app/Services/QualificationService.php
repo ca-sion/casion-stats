@@ -144,8 +144,8 @@ class QualificationService
                     break;
                 }
 
-                // Near Miss? (+/- 5%)
-                $margin = 0.05;
+                // Near Miss? (+/- 3%)
+                $margin = 0.03;
                 $isNearMiss = false;
                 $diffPercent = 0;
 
