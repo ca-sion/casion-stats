@@ -27,7 +27,7 @@ class HistoricalImportTest extends TestCase
     #[Test]
     public function it_can_parse_csv_file_correctly()
     {
-        $path = base_path('resources/data/import-2010-indoor-test.csv');
+        $path = base_path('resources/data/import-2010-indoor-example.csv');
 
         $data = $this->service->parseCsv($path);
 
@@ -141,7 +141,7 @@ class HistoricalImportTest extends TestCase
     #[Test]
     public function test_full_import_process_indoor_2010()
     {
-        $path = base_path('resources/data/import-2010-indoor-test.csv');
+        $path = base_path('resources/data/import-2010-indoor-example.csv');
         $data = $this->service->parseCsv($path);
 
         $this->assertCount(102, $data); // Actual file has 102 rows
@@ -184,7 +184,7 @@ class HistoricalImportTest extends TestCase
     #[Test]
     public function test_full_import_process_outdoor_2024()
     {
-        $path = base_path('resources/data/import-2024-outdoor-test.csv');
+        $path = base_path('resources/data/import-2024-outdoor-example.csv');
         $data = $this->service->parseCsv($path);
 
         // Based on head output: Martin, Benjamin, Léo
