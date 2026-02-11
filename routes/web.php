@@ -23,4 +23,5 @@ Route::get('/deduplicate-athletes', \App\Livewire\DeduplicateAthletes::class)->n
 Route::get('/deduplicate-events', \App\Livewire\DeduplicateEvents::class)->name('events.deduplicate');
 Route::get('/deduplicate-disciplines', \App\Livewire\DeduplicateDisciplines::class)->name('disciplines.deduplicate');
 Route::get('/leaderboard', \App\Livewire\Leaderboard::class)->name('leaderboard');
+Route::get('/records', \App\Livewire\ClubRecords::class)->name('records');
 Route::get('/qualifications/check', \App\Livewire\CheckQualifications::class)->name('qualifications.check');

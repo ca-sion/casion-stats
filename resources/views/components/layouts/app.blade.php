@@ -13,7 +13,7 @@
 </head>
 <body class="bg-base-200 min-h-screen font-sans">
     <header class="bg-white shadow-sm sticky top-0 z-40">
-        <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-3">
             <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity whitespace-nowrap group">
                 <img src="https://casion.ch/assets/logo/logo-casion.svg" alt="CA Sion Logo" class="h-8 lg:h-10 w-auto">
                 <div class="flex flex-col justify-center">
@@ -22,8 +22,11 @@
                 </div>
             </a>
             
-            <nav class="md:flex items-center gap-6 lg:ml-8">
-                <a href="{{ route('leaderboard') }}" class="text-sm font-black uppercase tracking-widest text-slate-500 hover:text-primary transition-colors flex items-center gap-2 {{ request()->routeIs('leaderboard') ? 'text-slate-800' : '' }}">
+            <nav class="flex items-center gap-3 lg:ml-8">
+                <a href="{{ route('records') }}" class="text-sm font-black text-slate-500 hover:text-primary transition-colors flex items-center gap-2 {{ request()->routeIs('records') ? 'text-slate-800' : '' }}">
+                    <span class="text-sm">🏅</span> <span class="hidden md:block">Records</span>
+                </a>
+                <a href="{{ route('leaderboard') }}" class="text-sm font-black text-slate-500 hover:text-primary transition-colors flex items-center gap-2 {{ request()->routeIs('leaderboard') ? 'text-slate-800' : '' }}">
                     <span class="text-sm">🏆</span> <span class="hidden md:block">Mur des Légendes</span>
                 </a>
             </nav>
