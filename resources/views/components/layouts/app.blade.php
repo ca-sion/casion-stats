@@ -85,7 +85,7 @@
         </form>
     </dialog>
 
-    <div class="container mx-auto py-8 px-4">
+    <div class="container mx-auto">
         {{ $slot }}
     </div>
 </body>

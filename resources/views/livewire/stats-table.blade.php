@@ -1,6 +1,6 @@
 <div class="space-y-4 animate-in fade-in duration-700">
     {{-- Search and Filters Header --}}
-    <div class="relative z-[100] bg-white rounded-2xl shadow-sm border border-slate-200/60 p-4">
+    <div class="relative bg-white rounded-2xl shadow-sm border border-slate-200/60 p-4">
         <div class="flex flex-col lg:flex-row lg:items-end gap-4">
             {{-- Discipline Selector --}}
             <div class="flex-1 space-y-1">
@@ -32,7 +32,7 @@
                         </svg>
                     </button>
 
-                    <div class="absolute z-[110] w-full mt-1 bg-white rounded-xl shadow-2xl border border-slate-200 p-1.5 transform origin-top transition-all duration-200" 
+                    <div class="absolute z-70 w-full mt-1 bg-white rounded-xl shadow-2xl border border-slate-200 p-1.5 transform origin-top transition-all duration-200" 
                          x-show="open" 
                          x-cloak
                          x-transition:enter="transition ease-out duration-200"

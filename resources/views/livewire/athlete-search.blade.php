@@ -29,7 +29,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-        class="absolute z-50 mt-2 w-full bg-white/90 backdrop-blur-md rounded-xl shadow-xl border border-base-200 overflow-hidden"
+        class="absolute z-80 mt-2 w-full bg-white/90 backdrop-blur-md rounded-xl shadow-xl border border-base-200 overflow-hidden"
         style="display: none;"
     >
         @if(count($results) > 0)
