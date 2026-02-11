@@ -71,8 +71,8 @@
                     <h4 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-xs">Lacunes connues</h4>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="bg-base-200 p-3 rounded-lg">
-                            <span class="font-bold block text-gray-900">2021 (Indoor)</span>
-                            Absence totale de données.
+                            <span class="font-bold block text-gray-900">1962 - 2001</span>
+                            Absence partielle de données. Seuls les records sont présents.
                         </div>
                     </div>
                 </section>
