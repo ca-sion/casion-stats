@@ -97,17 +97,45 @@ class DiagnosticTest extends TestCase
             'athlete_id' => $athlete->id,
             'discipline_id' => $discipline->id,
             'event_id' => $event->id,
+            'performance' => '10.50',
         ]);
 
         $result2 = Result::factory()->create([
             'athlete_id' => $athlete->id,
             'discipline_id' => $discipline->id,
             'event_id' => $event->id,
+            'performance' => '10.50',
         ]);
 
         $diagnostics = $result2->getDiagnostics();
 
         $this->assertCount(1, collect($diagnostics)->where('type', 'duplicate'));
+    }
+
+    public function test_it_does_not_detect_duplicates_for_different_performances_same_event(): void
+    {
+        $athlete = Athlete::factory()->create();
+        $discipline = Discipline::factory()->create();
+        $event = Event::factory()->create(['date' => '2024-01-01']);
+
+        $result1 = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'discipline_id' => $discipline->id,
+            'event_id' => $event->id,
+            'performance' => '10.50',
+        ]);
+
+        // Same athlete, event, discipline, DIFFERENT performance (e.g., heats vs final)
+        $result2 = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'discipline_id' => $discipline->id,
+            'event_id' => $event->id,
+            'performance' => '10.20',
+        ]);
+
+        $diagnostics = $result2->getDiagnostics();
+
+        $this->assertCount(0, collect($diagnostics)->where('type', 'duplicate'));
     }
 
     public function test_it_detects_format_issues(): void
@@ -219,5 +247,30 @@ class DiagnosticTest extends TestCase
 
         // Should NOT have an issue if already in the correct general category
         $this->assertNull($issue, 'Should not suggest optimizing to a specific category if already in a correct general one.');
+    }
+
+    public function test_it_prioritizes_primary_category_for_age_mismatch(): void
+    {
+        $primaryCat = AthleteCategory::factory()->create(['name' => 'U16 W', 'age_limit' => 15, 'genre' => 'w', 'is_primary' => true]);
+        $nonPrimaryCat = AthleteCategory::factory()->create(['name' => 'W 15', 'age_limit' => 15, 'genre' => 'w', 'is_primary' => false]);
+
+        // Athlete aged 15
+        $athlete = Athlete::factory()->create(['birthdate' => '2009-06-01', 'genre' => 'w']);
+        $event = Event::factory()->create(['date' => '2024-06-01']);
+
+        // Result currently in a wrong category (e.g., U14 W)
+        $wrongCat = AthleteCategory::factory()->create(['name' => 'U14 W', 'age_limit' => 13, 'genre' => 'w']);
+        $result = Result::factory()->create([
+            'athlete_id' => $athlete->id,
+            'athlete_category_id' => $wrongCat->id,
+            'event_id' => $event->id,
+        ]);
+
+        $diagnostics = collect($result->getDiagnostics());
+        $issue = $diagnostics->firstWhere('type', 'age_mismatch');
+
+        $this->assertNotNull($issue);
+        // Should suggest the primary category over the non-primary one
+        $this->assertEquals($primaryCat->id, $issue['suggested_category_id']);
     }
 }

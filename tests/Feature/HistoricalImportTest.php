@@ -76,6 +76,25 @@ class HistoricalImportTest extends TestCase
     }
 
     #[Test]
+    public function test_it_prioritizes_primary_categories_on_mapping()
+    {
+        // Category 1: W 15 (not primary)
+        AthleteCategory::create(['name' => 'W 15', 'name_de' => 'W 15', 'genre' => 'w', 'age_limit' => 15, 'is_primary' => false]);
+        
+        // Category 2: U16 W (primary, equivalent)
+        AthleteCategory::create(['name' => 'U16 W', 'name_de' => 'U16 W', 'genre' => 'w', 'age_limit' => 15, 'is_primary' => true]);
+
+        // 1. Direct match on non-primary name but should return primary equivalent
+        $foundCat = $this->service->findOrMapCategory('W 15');
+        // It should upgrade to U16 W
+        $this->assertEquals('U16 W', $foundCat->name);
+
+        // 2. Direct match on primary name
+        $foundCat2 = $this->service->findOrMapCategory('U16 W');
+        $this->assertEquals('U16 W', $foundCat2->name);
+    }
+
+    #[Test]
     public function it_can_resolve_athletes_in_various_scenarios()
     {
         // Scenario 1: Exact License Match

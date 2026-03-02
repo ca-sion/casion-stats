@@ -149,16 +149,39 @@ class HistoricalImportService
         ]);
     }
 
-    public function findCategoryModel(string $germanName): ?AthleteCategory
+    public function getPrimaryEquivalent(AthleteCategory $category): AthleteCategory
     {
-        // 1. Check exact name_de
-        $category = AthleteCategory::where('name_de', $germanName)->first();
-        if ($category) {
+        if ($category->is_primary) {
             return $category;
         }
 
-        // 2. Check exact name (Legacy/Fallback)
-        return AthleteCategory::where('name', $germanName)->first();
+        if ($category->age_limit) {
+            $primary = AthleteCategory::where('genre', $category->genre)
+                ->where('age_limit', $category->age_limit)
+                ->where('is_primary', true)
+                ->first();
+
+            return $primary ?? $category;
+        }
+
+        return $category;
+    }
+
+    public function findCategoryModel(string $germanName): ?AthleteCategory
+    {
+        // 1. Check exact name_de
+        $category = AthleteCategory::where('name_de', $germanName)->orderByDesc('is_primary')->first();
+        
+        if (!$category) {
+            // 2. Check exact name (Legacy/Fallback)
+            $category = AthleteCategory::where('name', $germanName)->orderByDesc('is_primary')->first();
+        }
+
+        if ($category) {
+            return $this->getPrimaryEquivalent($category);
+        }
+
+        return null;
     }
 
     public function findOrMapCategory(string $germanName): ?AthleteCategory

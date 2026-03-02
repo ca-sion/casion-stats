@@ -258,7 +258,7 @@ class ImportHistoricalData extends Component
     {
         return view('livewire.import-historical-data', [
             'availableDisciplines' => Discipline::orderBy('name_fr')->get(),
-            'availableCategories' => AthleteCategory::orderBy('name')->get(),
+            'availableCategories' => AthleteCategory::orderByDesc('is_primary')->orderBy('name')->get(),
         ])->layout('components.layouts.app');
     }
 }

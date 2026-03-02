@@ -151,15 +151,23 @@
 
                 @if($canFix && array_sum($fixSummary) > 0)
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-wrap gap-x-2 text-[9px] font-bold text-amber-800/60 uppercase tracking-tighter">
-                        @if($fixSummary['genre_mismatch'] > 0) <span>• {{ $fixSummary['genre_mismatch'] }} genres</span> @endif
-                        @if($fixSummary['duplicate'] > 0) <span>• {{ $fixSummary['duplicate'] }} doublons</span> @endif
-                        @if($fixSummary['age_mismatch'] > 0) <span>• {{ $fixSummary['age_mismatch'] }} catégories</span> @endif
-                        @if($fixSummary['missing_relation'] > 0) <span>• {{ $fixSummary['missing_relation'] }} orphelins</span> @endif
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        @if($fixSummary['genre_mismatch'] > 0)
+                        <button wire:click="bulkFix(['genre_mismatch'])" class="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-800 text-[9px] font-bold rounded whitespace-nowrap transition-colors">Corriger Genres ({{ $fixSummary['genre_mismatch'] }})</button>
+                        @endif
+                        @if($fixSummary['duplicate'] > 0)
+                        <button wire:click="bulkFix(['duplicate'])" class="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-800 text-[9px] font-bold rounded whitespace-nowrap transition-colors">Corriger Doublons ({{ $fixSummary['duplicate'] }})</button>
+                        @endif
+                        @if($fixSummary['age_mismatch'] > 0)
+                        <button wire:click="bulkFix(['age_mismatch'])" class="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-800 text-[9px] font-bold rounded whitespace-nowrap transition-colors">Corriger Catégories ({{ $fixSummary['age_mismatch'] }})</button>
+                        @endif
+                        @if($fixSummary['missing_relation'] > 0)
+                        <button wire:click="bulkFix(['missing_relation'])" class="px-2 py-1 bg-amber-200 hover:bg-amber-300 text-amber-800 text-[9px] font-bold rounded whitespace-nowrap transition-colors">Purger Orphelins ({{ $fixSummary['missing_relation'] }})</button>
+                        @endif
                     </div>
                     <button wire:click="bulkFix" 
-                            wire:confirm="Appliquer {{ array_sum($fixSummary) }} corrections ?"
-                            class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg transition-all shadow-md active:scale-95 whitespace-nowrap">
+                            wire:confirm="Appliquer TOUTES les {{ array_sum($fixSummary) }} corrections ?"
+                            class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg transition-all shadow-md active:scale-95 whitespace-nowrap ml-2">
                         Tout corriger ({{ array_sum($fixSummary) }})
                     </button>
                 </div>

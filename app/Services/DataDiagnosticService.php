@@ -89,8 +89,7 @@ class DataDiagnosticService
                 if ($athleticAge != $result->athleteCategory->age_limit) {
                     $suggestedCategory = AthleteCategory::where('genre', $result->athlete->genre)
                         ->where('name', 'LIKE', '% '.($athleticAge < 10 ? '0' : '').$athleticAge)
-                        ->get()
-                        ->sortBy(fn ($cat) => preg_match('/\d{2}$/', $cat->name))
+                        ->orderByDesc('is_primary')
                         ->first();
 
                     $issues[] = [
@@ -109,8 +108,9 @@ class DataDiagnosticService
                     $suggestedCategory = AthleteCategory::where('genre', $result->athlete->genre)
                         ->where('age_limit', '>=', $athleticAge)
                         ->orderBy('age_limit', 'asc')
+                        ->orderByDesc('is_primary')
                         ->get()
-                        ->sortBy(fn ($cat) => preg_match('/\d{2}$/', $cat->name))
+                        ->filter(fn ($cat) => ! preg_match('/\d{2}$/', $cat->name))
                         ->first();
 
                     if (! $suggestedCategory) {
@@ -132,9 +132,10 @@ class DataDiagnosticService
                     $optimalCategory = AthleteCategory::where('genre', $result->athlete->genre)
                         ->where('age_limit', '>=', $athleticAge)
                         ->where('age_limit', '<=', $result->athleteCategory->age_limit)
+                        ->orderBy('age_limit', 'asc')
+                        ->orderByDesc('is_primary')
                         ->get()
                         ->filter(fn ($cat) => ! preg_match('/\d{2}$/', $cat->name))
-                        ->sortBy('age_limit')
                         ->first();
 
                     if ($optimalCategory && $optimalCategory->id !== $result->athlete_category_id) {
@@ -151,18 +152,18 @@ class DataDiagnosticService
         }
 
         // 3. Potential duplicate (only flag if a version with a LOWER ID exists)
-        $duplicate = Result::where('athlete_id', $result->athlete_id)
+        $original = Result::where('athlete_id', $result->athlete_id)
             ->where('discipline_id', $result->discipline_id)
+            ->where('event_id', $result->event_id)
+            ->where('performance', $result->performance)
             ->where('id', '<', $result->id)
-            ->whereHas('event', function ($query) use ($result) {
-                $query->where('date', $result->event->date);
-            })
-            ->exists();
+            ->orderBy('id', 'asc')
+            ->first();
 
-        if ($duplicate) {
+        if ($original) {
             $issues[] = [
                 'type' => 'duplicate',
-                'label' => "Doublon (ID {$result->id} > original)",
+                'label' => "Doublon (original: ID {$original->id})",
                 'severity' => 'info',
                 'sql_fix' => "DELETE FROM results WHERE id = {$result->id};",
             ];
