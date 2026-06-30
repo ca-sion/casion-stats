@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'show']);
 Route::get('/athletes/{athlete}', [AthleteController::class, 'show'])->name('athletes.show');
-Route::get('/import-historical', ImportHistoricalData::class)->name('import.historical');
+Route::get('/import', ImportHistoricalData::class)->name('import.historical');
 Route::get('/deduplicate-athletes', \App\Livewire\DeduplicateAthletes::class)->name('athletes.deduplicate');
 Route::get('/deduplicate-events', \App\Livewire\DeduplicateEvents::class)->name('events.deduplicate');
 Route::get('/deduplicate-disciplines', \App\Livewire\DeduplicateDisciplines::class)->name('disciplines.deduplicate');
