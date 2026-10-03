@@ -559,6 +559,32 @@ class HistoricalImportService
     }
 
     /**
+     * Get a specificity score for a category. Higher score = more specific age-group category.
+     */
+    public function getCategoryPriority(?AthleteCategory $category, ?string $rawCategoryName = ''): int
+    {
+        $name = $category ? ($category->name . ' ' . ($category->name_de ?? '')) : (string) $rawCategoryName;
+        $score = 0;
+
+        // Age group categories (e.g. U14, U16, U18, U20, U23)
+        if (preg_match('/U\s*(\d+)/i', $name, $m)) {
+            $age = (int) $m[1];
+            $score += (100 - $age) + 50; // younger age-group = more specific
+        } elseif (preg_match('/[MW]\s*(\d+)/i', $name, $m)) {
+            // Masters category (e.g. M35, W40)
+            $score += 40;
+        } elseif ($category && ($category->is_youth || $category->age_limit !== null)) {
+            $score += 50;
+        }
+
+        if ($category && $category->is_primary) {
+            $score += 10;
+        }
+
+        return $score;
+    }
+
+    /**
      * Import a single result. If it already exists, enrich it and return the existing record.
      */
     public function importResult(array $data, Athlete $athlete, Discipline $discipline, AthleteCategory $category): Result
@@ -569,6 +595,18 @@ class HistoricalImportService
             // Enrich missing wind if present in import
             if (empty($existing->wind) && ! empty($data['wind'])) {
                 $existing->wind = trim($data['wind']);
+            }
+
+            // Upgrade category if the new one is more specific (e.g. U16 vs WOM)
+            $existingCat = $existing->athleteCategory;
+            $newPriority = $this->getCategoryPriority($category);
+            $existingPriority = $this->getCategoryPriority($existingCat);
+
+            if ($newPriority > $existingPriority) {
+                $existing->athlete_category_id = $category->id;
+            }
+
+            if ($existing->isDirty()) {
                 $existing->save();
             }
 

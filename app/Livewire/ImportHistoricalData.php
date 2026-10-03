@@ -79,6 +79,12 @@ class ImportHistoricalData extends Component
             } catch (\Throwable $e) {}
         }
 
+        if (empty($content) && is_object($this->csvFile) && method_exists($this->csvFile, 'get')) {
+            try {
+                $content = $this->csvFile->get();
+            } catch (\Throwable $e) {}
+        }
+
         if (empty($content) && is_object($this->csvFile) && method_exists($this->csvFile, 'getRealPath')) {
             try {
                 $path = $this->csvFile->getRealPath();
@@ -171,69 +177,108 @@ class ImportHistoricalData extends Component
 
         $data = $this->getParsedData();
 
-        // Pre-calculate status for all rows
-        $this->resolvedAthletes = [];
-        $seenInBatch = [];
+        // 1. First pass: resolve models, calculate priorities and group by batch key
+        $processedRows = [];
+        $groups = [];
 
         foreach ($data as $index => $row) {
-            // 1. Resolve Athlete (Dry Run)
             [$athlete, $isNewAthlete] = $this->service->resolveAthlete($row, true);
 
-            // 2. Resolve Discipline
             $dNameRaw = $row['raw_discipline'];
             $dNameMapped = $this->disciplineMappings[$dNameRaw] ?? null;
-            $discipline = null;
-            if ($dNameMapped) {
-                $discipline = Discipline::where('name_fr', $dNameMapped)->first();
-            } else {
-                $discipline = $this->service->findDisciplineModel($dNameRaw) ?? $this->service->findOrMapDiscipline($dNameRaw);
-            }
+            $discipline = $dNameMapped 
+                ? Discipline::where('name_fr', $dNameMapped)->first() 
+                : ($this->service->findDisciplineModel($dNameRaw) ?? $this->service->findOrMapDiscipline($dNameRaw));
 
-            // 3. Resolve Category
             $cNameRaw = $row['raw_category'];
             $cNameMapped = $this->categoryMappings[$cNameRaw] ?? null;
-            $category = null;
-            if ($cNameMapped) {
-                $category = AthleteCategory::where('name', $cNameMapped)->first();
-            } else {
-                $category = $this->service->findCategoryModel($cNameRaw) ?? $this->service->findOrMapCategory($cNameRaw);
-            }
+            $category = $cNameMapped 
+                ? AthleteCategory::where('name', $cNameMapped)->first() 
+                : ($this->service->findCategoryModel($cNameRaw) ?? $this->service->findOrMapCategory($cNameRaw));
 
-            // 4. Check Result Status
-            $resultStatus = 'error';
+            $athleteKey = $athlete?->id
+                ?? (! empty($row['license']) ? 'lic:'.$row['license'] : mb_strtolower($row['firstname'].'_'.$row['lastname'].'_'.($row['birthdate'] ?? '')));
+
+            $normPerf = $this->service->parsePerformanceToSeconds($row['performance']);
+            $batchKey = $athleteKey.'|'.($discipline?->id ?? $dNameRaw).'|'.($row['date'] ?? '').'|'.($normPerf ?? $row['performance']);
+
+            $existsInDb = false;
             if ($athlete && $discipline && $category) {
                 $existsInDb = $this->service->checkResultExists($row, $athlete, $discipline, $category);
-
-                // Check for in-batch duplicate (same athlete identity + discipline + date + normalized performance)
-                $normPerf = $this->service->parsePerformanceToSeconds($row['performance']);
-                $athleteKey = $athlete->id
-                    ?? (! empty($row['license']) ? 'lic:'.$row['license'] : mb_strtolower($row['firstname'].'_'.$row['lastname'].'_'.($row['birthdate'] ?? '')));
-
-                $batchKey = $athleteKey.'|'.($discipline->id ?? $dNameRaw).'|'.($row['date'] ?? '').'|'.($normPerf ?? $row['performance']);
-
-                if ($existsInDb || isset($seenInBatch[$batchKey])) {
-                    $resultStatus = 'duplicate';
-                } else {
-                    $resultStatus = 'new';
-                    $seenInBatch[$batchKey] = true;
-                }
             }
+
+            $priority = $this->service->getCategoryPriority($category, $cNameRaw);
 
             $athleteName = $athlete ? trim($athlete->first_name.' '.$athlete->last_name) : trim($row['firstname'].' '.$row['lastname']);
 
-            $this->resolvedAthletes[$index] = [
+            $processedRows[$index] = [
                 'row' => $row,
-                'athlete_status' => $isNewAthlete ? 'new' : 'found',
-                'athlete_id' => $athlete?->id,
-                'athlete_name' => $athleteName ?: '?',
-                'result_status' => $resultStatus,
-                'discipline_id' => $discipline?->id,
-                'discipline_name' => $discipline?->name_fr ?? $dNameRaw,
-                'category_id' => $category?->id,
-                'category_name' => $category?->name ?? $cNameRaw,
-                'is_selected' => ($resultStatus === 'new'), // Default select only new results
+                'athlete' => $athlete,
+                'isNewAthlete' => $isNewAthlete,
+                'athleteName' => $athleteName,
+                'discipline' => $discipline,
+                'category' => $category,
+                'batchKey' => $batchKey,
+                'existsInDb' => $existsInDb,
+                'priority' => $priority,
+                'dNameRaw' => $dNameRaw,
+                'cNameRaw' => $cNameRaw,
             ];
+
+            $groups[$batchKey][] = $index;
         }
+
+        // 2. Second pass: for each group, select the single best candidate (highest category priority)
+        $this->resolvedAthletes = [];
+
+        foreach ($groups as $batchKey => $indices) {
+            $anyInDb = false;
+            $bestIndex = null;
+            $highestPriority = -1;
+
+            foreach ($indices as $idx) {
+                $pRow = $processedRows[$idx];
+                if ($pRow['existsInDb']) {
+                    $anyInDb = true;
+                }
+                if ($pRow['athlete'] && $pRow['discipline'] && $pRow['category']) {
+                    if ($bestIndex === null || $pRow['priority'] > $highestPriority) {
+                        $bestIndex = $idx;
+                        $highestPriority = $pRow['priority'];
+                    }
+                }
+            }
+
+            foreach ($indices as $idx) {
+                $pRow = $processedRows[$idx];
+                $resultStatus = 'error';
+
+                if ($pRow['athlete'] && $pRow['discipline'] && $pRow['category']) {
+                    if ($anyInDb) {
+                        $resultStatus = 'duplicate';
+                    } elseif ($idx === $bestIndex) {
+                        $resultStatus = 'new';
+                    } else {
+                        $resultStatus = 'duplicate';
+                    }
+                }
+
+                $this->resolvedAthletes[$idx] = [
+                    'row' => $pRow['row'],
+                    'athlete_status' => $pRow['isNewAthlete'] ? 'new' : 'found',
+                    'athlete_id' => $pRow['athlete']?->id,
+                    'athlete_name' => $pRow['athleteName'] ?: '?',
+                    'result_status' => $resultStatus,
+                    'discipline_id' => $pRow['discipline']?->id,
+                    'discipline_name' => $pRow['discipline']?->name_fr ?? $pRow['dNameRaw'],
+                    'category_id' => $pRow['category']?->id,
+                    'category_name' => $pRow['category']?->name ?? $pRow['cNameRaw'],
+                    'is_selected' => ($resultStatus === 'new'),
+                ];
+            }
+        }
+
+        ksort($this->resolvedAthletes);
     }
 
     public function executeImport()

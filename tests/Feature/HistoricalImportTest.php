@@ -475,20 +475,58 @@ CSV;
         AthleteCategory::create(['name' => 'U23 Männer', 'name_de' => 'U23 Männer', 'is_primary' => false]);
 
         \Livewire\Livewire::test(\App\Livewire\ImportHistoricalData::class)
-            ->set('csvFile', $file)
+            ->set('parsedData', (new \App\Services\HistoricalImportService)->parseCsvString($csvContent))
             ->call('saveMappings')
             ->assertSet('step', 3)
             ->assertSet('resolvedAthletes', function ($athletes) {
                 return count($athletes) === 2
-                    && $athletes[0]['result_status'] === 'new'
-                    && $athletes[0]['is_selected'] === true
-                    && $athletes[1]['result_status'] === 'duplicate'
-                    && $athletes[1]['is_selected'] === false;
+                    && $athletes[0]['result_status'] === 'duplicate'
+                    && $athletes[0]['is_selected'] === false
+                    && $athletes[1]['result_status'] === 'new'
+                    && $athletes[1]['is_selected'] === true;
             })
             ->call('executeImport')
             ->assertSet('step', 4);
 
         $this->assertDatabaseCount('athletes', 1);
         $this->assertDatabaseCount('results', 1);
+    }
+
+    #[Test]
+    public function test_livewire_import_prioritizes_youth_category_u16_over_wom()
+    {
+        $csvContent = <<<CSV
+Id,Firstname,Lastname,Infix,DateOfBirth,License,Nation,Yob,OrganizationName,BestResultString,BestWindString,Rank,PerformanceDateTime,Town,CompetitionName,CompetitionNation,RelayMemberDetails,MultiDetails,Area,District,Region
+#100m #Frauen
+1,Sophie,Martin,,2009-03-12,333444,SUI,2009,CA Sion,12.30,+0.2,1,15.06.2024,Sion,Meeting Sion,SUI,,,,,FVA
+#100m #U16 W
+2,Sophie,Martin,,2009-03-12,333444,SUI,2009,CA Sion,12.30,+0.2,1,15.06.2024,Sion,Meeting Sion,SUI,,,,,FVA
+CSV;
+
+        Discipline::create(['name_de' => '100m', 'name_fr' => '100m', 'type' => 'individual']);
+        $catWom = AthleteCategory::create(['name' => 'Frauen', 'name_de' => 'Frauen', 'is_primary' => true]);
+        $catU16 = AthleteCategory::create(['name' => 'U16 W', 'name_de' => 'U16 W', 'is_youth' => true, 'age_limit' => 16, 'is_primary' => true]);
+
+        \Livewire\Livewire::test(\App\Livewire\ImportHistoricalData::class)
+            ->set('parsedData', (new \App\Services\HistoricalImportService)->parseCsvString($csvContent))
+            ->call('saveMappings')
+            ->assertSet('step', 3)
+            ->assertSet('resolvedAthletes', function ($athletes) use ($catU16) {
+                return count($athletes) === 2
+                    // First row (#Frauen) is duplicate
+                    && $athletes[0]['result_status'] === 'duplicate'
+                    && $athletes[0]['is_selected'] === false
+                    // Second row (#U16 W) is selected as new
+                    && $athletes[1]['result_status'] === 'new'
+                    && $athletes[1]['is_selected'] === true
+                    && $athletes[1]['category_id'] === $catU16->id;
+            })
+            ->call('executeImport')
+            ->assertSet('step', 4);
+
+        $this->assertDatabaseCount('athletes', 1);
+        $this->assertDatabaseCount('results', 1);
+        $result = Result::first();
+        $this->assertEquals($catU16->id, $result->athlete_category_id);
     }
 }

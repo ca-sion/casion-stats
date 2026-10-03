@@ -49,9 +49,19 @@ class CheckQualifications extends Component
 
         try {
             // 1. Limits
-            $limitsContent = file_get_contents($this->limitsFile->getRealPath());
-            $limitsJson = json_decode($limitsContent, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+            $limitsContent = '';
+            if (is_object($this->limitsFile)) {
+                if (method_exists($this->limitsFile, 'getRealPath') && is_file($this->limitsFile->getRealPath())) {
+                    $limitsContent = file_get_contents($this->limitsFile->getRealPath());
+                } elseif (method_exists($this->limitsFile, 'get')) {
+                    $limitsContent = $this->limitsFile->get();
+                }
+            } elseif (is_string($this->limitsFile) && is_file($this->limitsFile)) {
+                $limitsContent = file_get_contents($this->limitsFile);
+            }
+
+            $limitsJson = json_decode((string) $limitsContent, true);
+            if (! is_array($limitsJson) || json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception("Le fichier de limites n'est pas un JSON valide.");
             }
 
