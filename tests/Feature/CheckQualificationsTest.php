@@ -49,8 +49,8 @@ HTML;
         ->set('resultFiles', [$resultFile])
         ->call('check')
         ->assertHasNoErrors()
-        ->assertViewHas('errorMsg', null)
-        ->assertViewHas('results', function ($results) {
+        ->assertSet('errorMsg', null)
+        ->assertSet('results', function ($results) {
             return count($results) === 1 && $results[0]['athlete_name'] === 'Flash Gordon';
         });
 });
@@ -86,8 +86,8 @@ HTML
         ->set('resultUrls', 'https://example.com/results')
         ->call('check')
         ->assertHasNoErrors()
-        ->assertViewHas('errorMsg', null)
-        ->assertViewHas('results', function ($results) {
+        ->assertSet('errorMsg', null)
+        ->assertSet('results', function ($results) {
             return count($results) === 1 && $results[0]['athlete_name'] === 'Url Runner';
         });
 });

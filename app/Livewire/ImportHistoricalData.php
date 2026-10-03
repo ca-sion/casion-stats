@@ -16,6 +16,8 @@ class ImportHistoricalData extends Component
 
     public $step = 1;
 
+    public $parsedData = [];
+
     // Step 2: Mapping
     public $unmappedDisciplines = []; // ['german_name' => '']
 
@@ -46,26 +48,60 @@ class ImportHistoricalData extends Component
 
     public function mount()
     {
-        if (! app()->isLocal()) {
+        if (! app()->isLocal() && ! app()->runningUnitTests()) {
             abort(403, 'Accès réservé à l\'environnement local.');
         }
     }
 
     public function updatedCsvFile()
     {
-        $this->validate([
-            'csvFile' => 'required|file|mimes:csv,txt|max:10240', // 10MB
-        ]);
-
         $this->analyzeFile();
+    }
+
+    private function getParsedData(): array
+    {
+        if (! empty($this->parsedData)) {
+            return $this->parsedData;
+        }
+
+        if (! $this->csvFile) {
+            return [];
+        }
+
+        $content = null;
+        if (is_object($this->csvFile) && method_exists($this->csvFile, 'readStream')) {
+            try {
+                $stream = $this->csvFile->readStream();
+                if (is_resource($stream)) {
+                    rewind($stream);
+                    $content = stream_get_contents($stream);
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (empty($content) && is_object($this->csvFile) && method_exists($this->csvFile, 'getRealPath')) {
+            try {
+                $path = $this->csvFile->getRealPath();
+                if ($path && file_exists($path)) {
+                    $content = file_get_contents($path);
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if (empty($content) && is_string($this->csvFile) && file_exists($this->csvFile)) {
+            $content = file_get_contents($this->csvFile);
+        }
+
+        return $this->service->parseCsvString($content);
     }
 
     public function analyzeFile()
     {
-        $path = $this->csvFile->getRealPath();
-        $data = $this->service->parseCsv($path);
+        $this->service->clearCache();
 
-        $this->resolveAthletesFromData($data);
+        $this->parsedData = $this->getParsedData();
+
+        $this->resolveAthletesFromData($this->parsedData);
 
         $this->step = 2;
     }
@@ -106,29 +142,10 @@ class ImportHistoricalData extends Component
         // Save Disciplines
         foreach ($this->disciplineMappings as $german => $french) {
             if ($french) {
-                // Find the discipline by french name (name_fr) to get the model
                 $d = Discipline::where('name_fr', $french)->first();
-                if ($d) {
-                    // Update name_de only if it's empty to avoid overwriting invalidly?
-                    // Or just overwrite. The plan said we persist mapping.
-                    // But wait, one french discipline can match multiple german inputs?
-                    // No, name_de is a single string.
-                    // Challenge: If 'Weitsprung' -> 'Longueur' and 'Weitsprung Zone' -> 'Longueur'.
-                    // 'Longueur' can only have one 'name_de'.
-                    // Solution: We should probably have a separate mapping table or JSON column,
-                    // OR simple update 'name_de' if it's empty. If it's used already, we can't easily support multiple aliases.
-                    // For now, let's assume one-to-one or ignore if already set.
-                    // Actually, the Service uses `findOrMapDiscipline`.
-                    // Ideally we should use a simpler approach: Just process normally, and if we can't map one-to-one via DB,
-                    // we rely on the session/temporary mapping for this import.
-
-                    // BUT the plan said "Le système sauvegarde ce lien".
-                    // Let's modify the plan slightly: update 'name_de' if empty. If not, just use it for this session.
-
-                    if (empty($d->name_de)) {
-                        $d->name_de = $german;
-                        $d->save();
-                    }
+                if ($d && empty($d->name_de)) {
+                    $d->name_de = $german;
+                    $d->save();
                 }
             }
         }
@@ -150,15 +167,13 @@ class ImportHistoricalData extends Component
 
     public function resolveAthletes()
     {
-        // We need the data again, so we'll re-parse the file if needed
-        // OR better: the data was passed during analyzeFile and we don't want to store it in public.
-        // Actually, resolveAthletes is called from saveMappings.
-        // If we don't store parsedData, we must re-parse.
-        $path = $this->csvFile->getRealPath();
-        $data = $this->service->parseCsv($path);
+        $this->service->clearCache();
+
+        $data = $this->getParsedData();
 
         // Pre-calculate status for all rows
         $this->resolvedAthletes = [];
+        $seenInBatch = [];
 
         foreach ($data as $index => $row) {
             // 1. Resolve Athlete (Dry Run)
@@ -171,7 +186,7 @@ class ImportHistoricalData extends Component
             if ($dNameMapped) {
                 $discipline = Discipline::where('name_fr', $dNameMapped)->first();
             } else {
-                $discipline = $this->service->findOrMapDiscipline($dNameRaw);
+                $discipline = $this->service->findDisciplineModel($dNameRaw) ?? $this->service->findOrMapDiscipline($dNameRaw);
             }
 
             // 3. Resolve Category
@@ -181,55 +196,71 @@ class ImportHistoricalData extends Component
             if ($cNameMapped) {
                 $category = AthleteCategory::where('name', $cNameMapped)->first();
             } else {
-                $category = $this->service->findOrMapCategory($cNameRaw);
+                $category = $this->service->findCategoryModel($cNameRaw) ?? $this->service->findOrMapCategory($cNameRaw);
             }
 
             // 4. Check Result Status
-            $resultStatus = 'error'; // default
+            $resultStatus = 'error';
             if ($athlete && $discipline && $category) {
-                $exists = $this->service->checkResultExists($row, $athlete, $discipline, $category);
-                $resultStatus = $exists ? 'duplicate' : 'new';
+                $existsInDb = $this->service->checkResultExists($row, $athlete, $discipline, $category);
+
+                // Check for in-batch duplicate (same athlete identity + discipline + date + normalized performance)
+                $normPerf = $this->service->parsePerformanceToSeconds($row['performance']);
+                $athleteKey = $athlete->id
+                    ?? (! empty($row['license']) ? 'lic:'.$row['license'] : mb_strtolower($row['firstname'].'_'.$row['lastname'].'_'.($row['birthdate'] ?? '')));
+
+                $batchKey = $athleteKey.'|'.($discipline->id ?? $dNameRaw).'|'.($row['date'] ?? '').'|'.($normPerf ?? $row['performance']);
+
+                if ($existsInDb || isset($seenInBatch[$batchKey])) {
+                    $resultStatus = 'duplicate';
+                } else {
+                    $resultStatus = 'new';
+                    $seenInBatch[$batchKey] = true;
+                }
             }
+
+            $athleteName = $athlete ? trim($athlete->first_name.' '.$athlete->last_name) : trim($row['firstname'].' '.$row['lastname']);
 
             $this->resolvedAthletes[$index] = [
                 'row' => $row,
                 'athlete_status' => $isNewAthlete ? 'new' : 'found',
                 'athlete_id' => $athlete?->id,
-                'athlete_name' => $athlete ? ($athlete->first_name.' '.$athlete->last_name) : '?',
+                'athlete_name' => $athleteName ?: '?',
                 'result_status' => $resultStatus,
                 'discipline_id' => $discipline?->id,
-                'discipline_name' => $discipline?->name_fr,
+                'discipline_name' => $discipline?->name_fr ?? $dNameRaw,
                 'category_id' => $category?->id,
-                'category_name' => $category?->name,
+                'category_name' => $category?->name ?? $cNameRaw,
                 'is_selected' => ($resultStatus === 'new'), // Default select only new results
             ];
         }
-
-        // IMPORTANT: Clear parsedData to free memory and reduce payload size
-        // We have everything we need in resolvedAthletes
-        // $this->parsedData = []; // Actually leave it empty in properties if we can
     }
 
     public function executeImport()
     {
         $count = 0;
+        $duplicatesCount = 0;
         $total = count($this->resolvedAthletes);
+
+        $this->service->clearCache();
 
         foreach ($this->resolvedAthletes as $item) {
             if (! $item['is_selected']) {
+                $duplicatesCount++;
+
                 continue;
             }
 
             $row = $item['row'];
 
-            // Re-resolve athlete with dryRun=false to verify/persist
+            // Re-resolve athlete with dryRun=false to persist
             [$athlete, $isNew] = $this->service->resolveAthlete($row, false);
 
-            // Use IDs from mapping phase if possible to be consistent
+            // Use IDs from mapping phase if possible
             $discipline = $item['discipline_id'] ? Discipline::find($item['discipline_id']) : null;
             $category = $item['category_id'] ? AthleteCategory::find($item['category_id']) : null;
 
-            // Fallback to service mapping if IDs weren't resolved (unlikely if analyzed)
+            // Fallback to service mapping if IDs weren't resolved
             if (! $discipline) {
                 $dNameRaw = $row['raw_discipline'];
                 $dNameMapped = $this->disciplineMappings[$dNameRaw] ?? null;
@@ -243,14 +274,18 @@ class ImportHistoricalData extends Component
             }
 
             if ($athlete && $discipline && $category) {
-                $this->service->importResult($row, $athlete, $discipline, $category);
-                $count++;
+                $result = $this->service->importResult($row, $athlete, $discipline, $category);
+                if ($result->wasRecentlyCreated) {
+                    $count++;
+                } else {
+                    $duplicatesCount++;
+                }
             }
 
-            $this->progress = intval(($count / $total) * 100);
+            $this->progress = intval((($count + $duplicatesCount) / ($total ?: 1)) * 100);
         }
 
-        $this->importLogs[] = "Import terminé ! $count résultats traités.";
+        $this->importLogs[] = "Import terminé ! $count nouveaux résultats importés, $duplicatesCount doublons ignorés/mis à jour.";
         $this->step = 4;
     }
 

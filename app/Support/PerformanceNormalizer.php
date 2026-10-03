@@ -25,6 +25,11 @@ trait PerformanceNormalizer
         $performance = preg_replace('/(?:\s*[:\-]\s*)(?:200|400)?\s*$/', '', $performance);
         $performance = trim($performance);
 
+        // Replace decimal comma with dot if comma is used as decimal separator
+        if (str_contains($performance, ',') && ! str_contains($performance, '.')) {
+            $performance = str_replace(',', '.', $performance);
+        }
+
         // Normalize multiple dots: 14..13 -> 14.13
         $performance = preg_replace('/\.+/', '.', $performance);
 

@@ -177,9 +177,9 @@ class HistoricalImportTest extends TestCase
             $this->service->importResult($row, $athlete, $discipline, $category);
         }
 
-        // Assertions
+        // Assertions: 102 rows in CSV, but 45 are cross-category duplicates (e.g. Senior vs U20 lists), leaving 57 unique results.
         $this->assertGreaterThan(3, Athlete::count());
-        $this->assertDatabaseCount('results', 102);
+        $this->assertDatabaseCount('results', 57);
 
         // Specific check on Bastien Aymon
         $bastien = Athlete::where('last_name', 'Aymon')->first();
@@ -187,13 +187,19 @@ class HistoricalImportTest extends TestCase
         $this->assertEquals('Bastien', $bastien->first_name);
         $this->assertEquals('1991-01-18', $bastien->birthdate->format('Y-m-d'));
 
+        // Bastien Aymon was listed in both Männer and U20 Männer for 50m on 17.01.2010.
+        // It must exist only ONCE in the database.
+        $bastien50mResults = Result::where('athlete_id', $bastien->id)
+            ->whereHas('discipline', fn ($q) => $q->where('name_de', '50m'))
+            ->get();
+        $this->assertCount(1, $bastien50mResults);
+
         // Check Result
-        $result = Result::where('athlete_id', $bastien->id)->first();
+        $result = $bastien50mResults->first();
         $this->assertEquals('6.81', $result->performance);
         $this->assertEquals(6.81, $result->performance_normalized);
         $this->assertNotNull($result->iaaf_points);
         $this->assertGreaterThan(0, $result->iaaf_points);
-        // $this->assertEquals(1, $result->rank); // Rank is now ignored during import
 
         // Check Event creation
         $this->assertEquals('Championnats romands en salle', $result->event->name);
@@ -206,8 +212,7 @@ class HistoricalImportTest extends TestCase
         $path = base_path('resources/data/import-2024-outdoor-example.csv');
         $data = $this->service->parseCsv($path);
 
-        // Based on head output: Martin, Benjamin, Léo
-        // Actual file has 1038 rows
+        // Actual file has 1038 rows, containing 699 unique performances and 339 duplicate cross-category rows
         $this->assertCount(1038, $data);
 
         foreach ($data as $row) {
@@ -219,7 +224,7 @@ class HistoricalImportTest extends TestCase
         }
 
         $this->assertGreaterThan(3, Athlete::count());
-        $this->assertDatabaseCount('results', 1038);
+        $this->assertDatabaseCount('results', 699);
 
         // Check Benjamin Savioz (11.34, +1,8 wind, 28.04.2024)
         $benjamin = Athlete::where('first_name', 'Benjamin')->where('last_name', 'Savioz')->first();
@@ -449,5 +454,41 @@ class HistoricalImportTest extends TestCase
         $result3 = $this->service->importResult($dataDifferentDate, $athlete, $discipline, $category);
         $this->assertNotEquals($existingEvent->id, $result3->event_id);
         $this->assertEquals(3, Event::count());
+    }
+
+    #[Test]
+    public function test_livewire_import_wizard_flags_and_skips_duplicates()
+    {
+        $csvContent = <<<CSV
+Id,Firstname,Lastname,Infix,DateOfBirth,License,Nation,Yob,OrganizationName,BestResultString,BestWindString,Rank,PerformanceDateTime,Town,CompetitionName,CompetitionNation,RelayMemberDetails,MultiDetails,Area,District,Region
+#100m #Männer
+1,Marc,Dupont,,2000-05-10,111222,SUI,2000,CA Sion,10.80,+0.5,1,15.06.2024,Sion,Meeting Sion,SUI,,,,,FVA
+#100m #U23 Männer
+2,Marc,Dupont,,2000-05-10,111222,SUI,2000,CA Sion,10.80,+0.5,1,15.06.2024,Sion,Meeting Sion,SUI,,,,,FVA
+CSV;
+
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('import.csv', $csvContent);
+
+        // Pre-create discipline and category
+        Discipline::create(['name_de' => '100m', 'name_fr' => '100m', 'type' => 'individual']);
+        AthleteCategory::create(['name' => 'Männer', 'name_de' => 'Männer', 'is_primary' => true]);
+        AthleteCategory::create(['name' => 'U23 Männer', 'name_de' => 'U23 Männer', 'is_primary' => false]);
+
+        \Livewire\Livewire::test(\App\Livewire\ImportHistoricalData::class)
+            ->set('csvFile', $file)
+            ->call('saveMappings')
+            ->assertSet('step', 3)
+            ->assertSet('resolvedAthletes', function ($athletes) {
+                return count($athletes) === 2
+                    && $athletes[0]['result_status'] === 'new'
+                    && $athletes[0]['is_selected'] === true
+                    && $athletes[1]['result_status'] === 'duplicate'
+                    && $athletes[1]['is_selected'] === false;
+            })
+            ->call('executeImport')
+            ->assertSet('step', 4);
+
+        $this->assertDatabaseCount('athletes', 1);
+        $this->assertDatabaseCount('results', 1);
     }
 }
